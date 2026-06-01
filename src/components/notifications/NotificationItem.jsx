@@ -46,7 +46,7 @@ export function NotificationItem({ notification, onClick }) {
       layout
       onClick={() => onClick(notification)}
       className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-lg transition-colors ${
-        read ? 'hover:bg-accent/60' : 'bg-teal-500/5 hover:bg-teal-500/10'
+        read ? 'hover:bg-accent' : 'bg-teal-500/10 hover:bg-teal-500/20'
       }`}
     >
       {!read && <span className="mt-2 w-2 h-2 rounded-full bg-teal-400 shrink-0" />}

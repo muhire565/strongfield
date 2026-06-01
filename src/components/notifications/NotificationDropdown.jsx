@@ -59,7 +59,7 @@ export function NotificationDropdown() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -12, scale: 0.96 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="absolute right-0 top-full mt-3 w-[360px] bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-[60]"
+          className="absolute right-0 top-full mt-3 w-[360px] bg-background border border-border rounded-xl shadow-2xl overflow-hidden isolate z-[100]"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <h3 className="font-semibold text-foreground text-sm">Notifications</h3>
