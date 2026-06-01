@@ -7,6 +7,7 @@ export default function ProductsHeader({
   statusFilter,
   onStatusFilterChange,
   onAddClick,
+  canAdd = true,
 }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -43,10 +44,12 @@ export default function ProductsHeader({
           <option value="out_of_stock">Out of Stock</option>
         </select>
 
-        <button onClick={onAddClick} className="btn btn-primary">
-          <Plus size={16} />
-          <span>Add Product</span>
-        </button>
+        {canAdd && (
+          <button onClick={onAddClick} className="btn btn-primary">
+            <Plus size={16} />
+            <span>Add Product</span>
+          </button>
+        )}
       </div>
     </div>
   );

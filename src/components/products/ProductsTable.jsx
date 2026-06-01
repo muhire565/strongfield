@@ -55,7 +55,7 @@ const rowVariants = {
   exit:    { opacity: 0, x: -20 },
 };
 
-export default function ProductsTable({ products, sortKey, sortDir, onSort, onEdit, onDelete, onExport, pageOffset = 0 }) {
+export default function ProductsTable({ products, sortKey, sortDir, onSort, onEdit, onDelete, onExport, pageOffset = 0, canEdit = true, canDelete = true }) {
   const handleSort = (key) => {
     if (!key || key === 'index' || key === 'actions') return;
     onSort(key);
@@ -134,24 +134,28 @@ export default function ProductsTable({ products, sortKey, sortDir, onSort, onEd
                       >
                         <ArrowRightLeft size={15} />
                       </button>
-                      <button
-                        onClick={() => onEdit(product)}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-amber-600 hover:bg-amber-50
-                                   dark:hover:text-amber-400 dark:hover:bg-amber-900/20 transition-colors"
-                        title="Edit"
-                        disabled={product._optimistic}
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
-                        onClick={() => onDelete(product)}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50
-                                   dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors"
-                        title="Delete"
-                        disabled={product._optimistic}
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(product)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-amber-600 hover:bg-amber-50
+                                     dark:hover:text-amber-400 dark:hover:bg-amber-900/20 transition-colors"
+                          title="Edit"
+                          disabled={product._optimistic}
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(product)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50
+                                     dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors"
+                          title="Delete"
+                          disabled={product._optimistic}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </motion.tr>

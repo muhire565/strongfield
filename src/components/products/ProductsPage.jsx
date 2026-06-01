@@ -70,7 +70,7 @@ function TableSkeleton() {
   );
 }
 
-function EmptyState({ searchQuery, onAddProduct }) {
+function EmptyState({ searchQuery, onAddProduct, canAdd = true }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -88,7 +88,7 @@ function EmptyState({ searchQuery, onAddProduct }) {
           ? `No products match "${searchQuery}". Try a different search term.`
           : 'Get started by adding your first product to this branch.'}
       </p>
-      {!searchQuery && (
+      {canAdd && !searchQuery && (
         <button
           onClick={onAddProduct}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600
@@ -108,6 +108,14 @@ export default function ProductsPage() {
   useProductsRealtime();
 
   const profile = useAuthStore((s) => s.profile);
+  const role = profile?.role || 'sales';
+  const isAdmin = role === 'admin';
+  const isStockManager = role === 'stock_manager';
+  const canAdd = isAdmin || isStockManager;
+  const canEdit = isAdmin;
+  const canDelete = isAdmin;
+  const canExport = isAdmin || isStockManager;
+
   const { data: products = [], isLoading } = useProducts();
   const { data: exports = [], isLoading: exportsLoading } = useProductExports();
 
@@ -199,24 +207,34 @@ export default function ProductsPage() {
   );
 
   const handleAdd = () => {
+    if (!canAdd) return;
     setSelectedProduct(null);
     setModalMode('create');
   };
 
   const handleEdit = (product) => {
+    if (!canEdit) return;
     setSelectedProduct(product);
     setModalMode('edit');
   };
 
-  const handleDelete = (product) => setDeleteTarget(product);
-  const handleExport = (product) => setExportTarget(product);
+  const handleDelete = (product) => {
+    if (!canDelete) return;
+    setDeleteTarget(product);
+  };
+  const handleExport = (product) => {
+    if (!canExport) return;
+    setExportTarget(product);
+  };
 
   // Mutations now carry their own toast calls — just handle modal closing here
   const handleSubmit = async (data) => {
     try {
       if (modalMode === 'create') {
+        if (!canAdd) return;
         await createProduct.mutateAsync(data);
       } else {
+        if (!canEdit) return;
         await updateProduct.mutateAsync({ id: selectedProduct.id, data });
       }
       setModalMode(null);
@@ -260,6 +278,7 @@ export default function ProductsPage() {
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
             onAddClick={handleAdd}
+            canAdd={canAdd}
           />
           <ProductsStatsBar />
         </>
@@ -267,25 +286,30 @@ export default function ProductsPage() {
 
       {/* Tab bar */}
       <div className="flex items-center gap-1 mb-5 border-b border-border">
-        {['products', 'history'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`relative pb-3 px-1 text-sm font-medium transition-colors capitalize ${
-              activeTab === tab
-                ? 'text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab === 'products' ? 'Products' : 'Export History'}
-            {activeTab === tab && (
-              <motion.div
-                layoutId="tab-underline"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-              />
-            )}
-          </button>
-        ))}
+        {[
+          { id: 'products', label: 'Products', show: true },
+          { id: 'history', label: 'Export History', show: canExport },
+        ]
+          .filter((t) => t.show)
+          .map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative pb-3 px-1 text-sm font-medium transition-colors capitalize ${
+                activeTab === tab.id
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="tab-underline"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+                />
+              )}
+            </button>
+          ))}
       </div>
 
       {/* Tab content */}
@@ -301,7 +325,7 @@ export default function ProductsPage() {
             {isLoading ? (
               <TableSkeleton />
             ) : filteredProducts.length === 0 ? (
-              <EmptyState searchQuery={debouncedSearch} onAddProduct={handleAdd} />
+              <EmptyState searchQuery={debouncedSearch} onAddProduct={handleAdd} canAdd={canAdd} />
             ) : (
               <>
                 <ProductsTable
@@ -313,6 +337,8 @@ export default function ProductsPage() {
                   onDelete={handleDelete}
                   onExport={handleExport}
                   pageOffset={(page - 1) * limit}
+                  canEdit={canEdit}
+                  canDelete={canDelete}
                 />
                 <Pagination
                   page={page}
