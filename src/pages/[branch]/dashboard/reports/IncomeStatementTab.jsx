@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 import { useIncomeStatement } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printIncomeStatementReport } from '../../../../utils/reportPdfGenerator';
 
 function Row({ label, value, indent = false, isTotal = false, isSub = false }) {
   return (
@@ -70,7 +71,7 @@ export default function IncomeStatementTab() {
       </div>
 
       <div className="flex justify-end mt-6">
-        <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+        <button onClick={() => printIncomeStatementReport(d)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
           <Download className="w-4 h-4" /> Download PDF
         </button>
       </div>

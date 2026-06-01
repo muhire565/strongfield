@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 import { useCreditReport } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printCreditReport } from '../../../../utils/reportPdfGenerator';
 
 function Kpi({ label, value, color = 'text-foreground' }) {
   return (
@@ -60,6 +61,12 @@ export default function CreditReportTab() {
           </tbody>
         </table>
         {ledger.length === 0 && <p className="py-6 text-center text-muted-foreground text-sm">No credit clients in this period.</p>}
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <button onClick={() => printCreditReport(d)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+          <Download className="w-4 h-4" /> Download PDF
+        </button>
       </div>
     </div>
   );

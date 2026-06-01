@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import { useTrialBalance } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printTrialBalanceReport } from '../../../../utils/reportPdfGenerator';
 
 export default function TrialBalanceTab() {
   const { toDate } = useReportStore();
@@ -58,7 +59,7 @@ export default function TrialBalanceTab() {
       </table>
 
       <div className="flex justify-end mt-6">
-        <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+        <button onClick={() => printTrialBalanceReport(d)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
           <Download className="w-4 h-4" /> Download PDF
         </button>
       </div>

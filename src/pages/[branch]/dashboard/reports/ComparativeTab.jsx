@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { GitCompare, TrendingUp, TrendingDown } from 'lucide-react';
+import { GitCompare, TrendingUp, TrendingDown, Download } from 'lucide-react';
 import { useComparative } from '../../../../hooks/useReports';
 import { formatUGX } from '../../../../utils/formatters';
+import { printComparativeReport } from '../../../../utils/reportPdfGenerator';
 
 export default function ComparativeTab() {
   const [p1From, setP1From] = useState(() => {
@@ -107,6 +108,12 @@ export default function ComparativeTab() {
           </table>
         </div>
       )}
+
+      <div className="flex justify-end mt-4">
+        <button onClick={() => printComparativeReport(data, `${p1From} to ${p1To}`, `${p2From} to ${p2To}`)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+          <Download className="w-4 h-4" /> Download PDF
+        </button>
+      </div>
     </div>
   );
 }

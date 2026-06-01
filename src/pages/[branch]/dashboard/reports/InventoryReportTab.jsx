@@ -3,6 +3,7 @@ import { AlertTriangle, PackageX, TrendingUp, TrendingDown, Download } from 'luc
 import { useInventoryReport } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printInventoryReport } from '../../../../utils/reportPdfGenerator';
 
 function Card({ icon: Icon, label, value, color }) {
   return (
@@ -82,6 +83,12 @@ export default function InventoryReportTab() {
             {(d.out_of_stock_items || []).length === 0 && <p className="text-sm text-muted-foreground">All products in stock.</p>}
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button onClick={() => printInventoryReport(d)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+          <Download className="w-4 h-4" /> Download PDF
+        </button>
       </div>
     </div>
   );

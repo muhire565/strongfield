@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 import { useOwnerEquity } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printOwnerEquityReport } from '../../../../utils/reportPdfGenerator';
 
 function Row({ label, value, isTotal = false }) {
   return (
@@ -47,7 +48,7 @@ export default function OwnerEquityTab() {
         </div>
 
         <div className="flex justify-end mt-6">
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+          <button onClick={() => printOwnerEquityReport(d)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
             <Download className="w-4 h-4" /> Download PDF
           </button>
         </div>

@@ -106,7 +106,7 @@ export default function LoginForm({ branchName, accentColor }) {
                 type="text"
                 required
                 placeholder="Enter your username"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-muted/60 border border-border/80 text-foreground text-sm placeholder:text-muted-foreground/60 outline-none transition-all focus:border-foreground/30 focus:ring-2 focus:ring-foreground/5 focus:bg-muted"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 text-sm placeholder:text-gray-400 outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 aria-label="Username"
@@ -126,7 +126,7 @@ export default function LoginForm({ branchName, accentColor }) {
                 type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="Enter your password"
-                className="w-full pl-10 pr-11 py-3 rounded-xl bg-muted/60 border border-border/80 text-foreground text-sm placeholder:text-muted-foreground/60 outline-none transition-all focus:border-foreground/30 focus:ring-2 focus:ring-foreground/5 focus:bg-muted"
+                className="w-full pl-10 pr-11 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 text-sm placeholder:text-gray-400 outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 aria-label="Password"

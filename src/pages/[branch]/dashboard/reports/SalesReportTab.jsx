@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 import { useSalesReport } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printSalesReport } from '../../../../utils/reportPdfGenerator';
 
 const groupOptions = [
   { key: 'day', label: 'By Day' },
@@ -126,8 +127,8 @@ export default function SalesReportTab() {
       </div>
 
       <div className="flex justify-end">
-        <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
-          <Download className="w-4 h-4" /> Download CSV
+        <button onClick={() => printSalesReport(data, groupBy)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+          <Download className="w-4 h-4" /> Download PDF
         </button>
       </div>
     </div>

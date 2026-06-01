@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingBag, Package } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingBag, Package, Download } from 'lucide-react';
 import { useReportSummary } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printDashboardReport } from '../../../../utils/reportPdfGenerator';
 
 function KpiCard({ icon: Icon, label, value, change, delay = 0 }) {
   return (
@@ -55,6 +56,11 @@ export default function DashboardTab() {
         <KpiCard icon={Users} label="Outstanding Receivables" value={`USh ${formatUGX(d.accounts_receivable || 0)}`} delay={0.15} />
       </div>
 
+      <div className="flex justify-end">
+        <button onClick={() => printDashboardReport(d, fromDate, toDate)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+          <Download className="w-4 h-4" /> Download PDF
+        </button>
+      </div>
       {/* Summary Table */}
       <div className="bg-card border border-border rounded-xl p-5">
         <h3 className="text-lg font-semibold mb-4">Financial Summary</h3>

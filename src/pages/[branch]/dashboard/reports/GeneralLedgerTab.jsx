@@ -3,6 +3,7 @@ import { Download } from 'lucide-react';
 import { useGeneralLedger } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
+import { printGeneralLedgerReport } from '../../../../utils/reportPdfGenerator';
 
 const modes = [
   { key: '', label: 'All' },
@@ -80,7 +81,7 @@ export default function GeneralLedgerTab() {
       </div>
 
       <div className="flex justify-end">
-        <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
+        <button onClick={() => printGeneralLedgerReport(data, modes.find(m => m.key === mode)?.label || 'All')} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
           <Download className="w-4 h-4" /> Download PDF
         </button>
       </div>
