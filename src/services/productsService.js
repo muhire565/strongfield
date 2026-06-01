@@ -34,6 +34,7 @@ export const productsService = {
     const query = params.toString();
     const url = `${API_URL}/products${query ? `?${query}` : ''}`;
     const json = await fetchWithAuth(url);
+    console.log('productsService.list response:', json);
     return json.data || [];
   },
 

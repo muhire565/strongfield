@@ -55,7 +55,7 @@ const rowVariants = {
   exit:    { opacity: 0, x: -20 },
 };
 
-export default function ProductsTable({ products, sortKey, sortDir, onSort, onEdit, onDelete, onExport }) {
+export default function ProductsTable({ products, sortKey, sortDir, onSort, onEdit, onDelete, onExport, pageOffset = 0 }) {
   const handleSort = (key) => {
     if (!key || key === 'index' || key === 'actions') return;
     onSort(key);
@@ -109,7 +109,7 @@ export default function ProductsTable({ products, sortKey, sortDir, onSort, onEd
                     hover:bg-blue-50/40 dark:hover:bg-blue-900/10 transition-colors duration-100
                     ${product._optimistic ? 'opacity-60' : ''}`}
                 >
-                  <td className="px-4 py-3 text-muted-foreground tabular-nums">{idx + 1}</td>
+                  <td className="px-4 py-3 text-muted-foreground tabular-nums">{pageOffset + idx + 1}</td>
                   <td className="px-4 py-3 font-medium text-foreground">{product.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{product.brand}</td>
                   <td className="px-4 py-3 text-muted-foreground">{product.model}</td>

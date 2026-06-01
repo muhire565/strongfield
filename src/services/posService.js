@@ -27,11 +27,20 @@ async function fetchWithAuth(url, options = {}) {
   return json;
 }
 
+function buildParams(filters) {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.append(key, value);
+    }
+  });
+  return params.toString();
+}
+
 export const posService = {
   // Clients
   async listClients(filters = {}) {
-    const params = new URLSearchParams(filters);
-    const query = params.toString();
+    const query = buildParams(filters);
     const json = await fetchWithAuth(`${API_URL}/pos/clients${query ? `?${query}` : ''}`);
     return json.data || [];
   },
@@ -59,10 +68,9 @@ export const posService = {
 
   // Sales
   async listSales(filters = {}) {
-    const params = new URLSearchParams(filters);
-    const query = params.toString();
+    const query = buildParams(filters);
     const json = await fetchWithAuth(`${API_URL}/pos/sales${query ? `?${query}` : ''}`);
-    return json.data || [];
+    return json;
   },
 
   async getSale(id) {
@@ -101,18 +109,16 @@ export const posService = {
   },
 
   async getPaymentsByMode(filters = {}) {
-    const params = new URLSearchParams(filters);
-    const query = params.toString();
+    const query = buildParams(filters);
     const json = await fetchWithAuth(`${API_URL}/pos/payments/by-mode${query ? `?${query}` : ''}`);
     return json.data || [];
   },
 
   // Quotations
   async listQuotations(filters = {}) {
-    const params = new URLSearchParams(filters);
-    const query = params.toString();
+    const query = buildParams(filters);
     const json = await fetchWithAuth(`${API_URL}/pos/quotations${query ? `?${query}` : ''}`);
-    return json.data || [];
+    return json;
   },
 
   async getQuotation(id) {

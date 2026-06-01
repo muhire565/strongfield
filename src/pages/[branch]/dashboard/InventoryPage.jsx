@@ -12,6 +12,7 @@ import { MovementHistoryTable } from '../../../components/inventory/MovementHist
 import { ProductDetailPanel } from '../../../components/inventory/ProductDetailPanel';
 import { StockInModal } from '../../../components/inventory/StockInModal';
 import { StockOutModal } from '../../../components/inventory/StockOutModal';
+import Pagination from '../../../components/ui/Pagination';
 
 export default function InventoryPage() {
   // Activate realtime subscription for this page
@@ -22,14 +23,18 @@ export default function InventoryPage() {
   // Inventory Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const limit = 50;
   
   const { data: inventoryData, isLoading } = useInventory({
     search: searchTerm || undefined,
     status: statusFilter || undefined,
-    limit: 100, // Load enough for client side display
+    page,
+    limit,
   });
 
   const products = Array.isArray(inventoryData) ? inventoryData : (inventoryData?.data || []);
+  const total = inventoryData?.total ?? products.length;
 
   // Modals & Panels State
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -115,7 +120,7 @@ export default function InventoryPage() {
                       type="text"
                       placeholder="Search inventory..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                       className={`${inputClass()} pl-9`}
                     />
                   </div>
@@ -123,7 +128,7 @@ export default function InventoryPage() {
                     <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                     <select
                       value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
                       className={`${inputClass()} pl-9`}
                     >
                       <option value="">All Status</option>
@@ -143,6 +148,13 @@ export default function InventoryPage() {
                 onStockOut={handleStockOut}
                 onEdit={() => {}}
                 onDelete={() => {}}
+                pageOffset={(page - 1) * limit}
+              />
+              <Pagination
+                page={page}
+                limit={limit}
+                total={total}
+                onChange={setPage}
               />
             </motion.div>
           ) : (

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSales, useSaleDetail, useRecordPayment, useVoidSale } from '../../../../hooks/usePOS';
 import { usePOSRealtime } from '../../../../hooks/usePOSRealtime';
 import { Search, Filter, Receipt, MoreVertical, CheckCircle, Clock, XCircle, CreditCard, X, Printer, Banknote, Smartphone, AlertTriangle } from 'lucide-react';
+import Pagination from '../../../../components/ui/Pagination';
 import { format } from 'date-fns';
 import { printInvoice } from '../../../../utils/pdfGenerator';
 
@@ -13,6 +14,8 @@ export default function SalesListPage() {
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const limit = 50;
   const [selectedSale, setSelectedSale] = useState(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -24,17 +27,16 @@ export default function SalesListPage() {
   const recordPaymentMut = useRecordPayment();
   const voidSaleMut = useVoidSale();
 
-  const { data: salesData, isLoading } = useSales(statusFilter ? { status: statusFilter } : {});
-  const { data: saleDetailData } = useSaleDetail(selectedSale?.id);
-  const sales = salesData || [];
-  const detailSale = saleDetailData || selectedSale;
-
-  const filteredSales = sales.filter(s => {
-    if (!search) return true;
-    const lower = search.toLowerCase();
-    return s.sale_number.toLowerCase().includes(lower) || 
-           s.client?.full_name?.toLowerCase().includes(lower);
+  const { data: salesData, isLoading } = useSales({
+    status: statusFilter || undefined,
+    search: search || undefined,
+    page,
+    limit,
   });
+  const { data: saleDetailData } = useSaleDetail(selectedSale?.id);
+  const sales = salesData?.data || [];
+  const total = salesData?.count || 0;
+  const detailSale = saleDetailData || selectedSale;
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -75,7 +77,7 @@ export default function SalesListPage() {
               type="text" 
               placeholder="Search by invoice number or client name..." 
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pos-input w-full pl-10 pr-4 py-2 text-sm"
             />
           </div>
@@ -83,7 +85,7 @@ export default function SalesListPage() {
             <Filter size={18} className="text-muted-foreground" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="pos-input px-3 py-2 text-sm appearance-none pr-8"
             >
               <option value="">All Statuses</option>
@@ -112,10 +114,10 @@ export default function SalesListPage() {
             <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr><td colSpan="8" className="p-8 text-center text-muted-foreground">Loading sales...</td></tr>
-              ) : filteredSales.length === 0 ? (
+              ) : sales.length === 0 ? (
                 <tr><td colSpan="8" className="p-8 text-center text-muted-foreground">No sales found.</td></tr>
               ) : (
-                filteredSales.map((sale) => (
+                sales.map((sale) => (
                   <tr key={sale.id} className="hover:bg-muted/30 transition-colors group cursor-pointer" onClick={() => setSelectedSale(sale)}>
                     <td className="p-4 font-medium text-foreground">
                       <div className="flex items-center space-x-2">
@@ -140,6 +142,12 @@ export default function SalesListPage() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={total}
+          onChange={setPage}
+        />
       </div>
 
       {/* Detail Slide-over Panel (Simplified) */}

@@ -77,7 +77,7 @@ const cardVariants = {
 export default function InventoryStatsBar() {
   const { data: summary } = useInventorySummary();
 
-  const stats = summary || { total: 0, lowStock: 0, outOfStock: 0, stockValue: 0, salesValue: 0 };
+  const stats = summary || { total: 0, lowStock: 0, outOfStock: 0, stockValue: 0, potentialSalesValue: 0 };
 
   const cards = [
     {
@@ -97,12 +97,12 @@ export default function InventoryStatsBar() {
       value:     <AnimatedCurrency value={stats.stockValue} />,
     },
     {
-      label:     'Sales Value',
+      label:     'Potential Sales Value',
       iconBg:    'bg-purple-100 dark:bg-purple-900/40',
       iconColor: 'text-purple-600 dark:text-purple-400',
       valueColor:'text-purple-700 dark:text-purple-300',
       icon:      Banknote,
-      value:     <AnimatedCurrency value={stats.salesValue} />,
+      value:     <AnimatedCurrency value={stats.potentialSalesValue} />,
     },
     {
       label:     'In Stock',
@@ -131,7 +131,7 @@ export default function InventoryStatsBar() {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
       {cards.map((card, i) => {
         const Icon = card.icon;
         return (
@@ -144,14 +144,16 @@ export default function InventoryStatsBar() {
             layout
             className="card p-5 hover:shadow-md transition-shadow duration-200 cursor-default"
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium mb-1.5 uppercase tracking-wide">
+            <div className="flex items-start justify-between gap-3 min-w-0">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-muted-foreground font-medium mb-1.5 uppercase tracking-wide truncate">
                   {card.label}
                 </p>
-                <p className={`text-2xl font-bold ${card.valueColor}`}>{card.value}</p>
+                <p className={`text-lg font-bold break-all leading-tight ${card.valueColor}`}>
+                  {card.value}
+                </p>
               </div>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${card.iconBg}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${card.iconBg}`}>
                 <Icon size={19} className={card.iconColor} />
               </div>
             </div>

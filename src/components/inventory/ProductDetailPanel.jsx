@@ -85,6 +85,10 @@ export function ProductDetailPanel({ productId, isOpen, onClose, onStockIn, onSt
                     <p className="font-semibold text-sm text-emerald-600 dark:text-emerald-400">{formatUGX(product.stock_value)}</p>
                   </div>
                   <div className="bg-card p-4">
+                    <p className="text-xs text-muted-foreground mb-1">Potential Sales Value</p>
+                    <p className="font-semibold text-sm text-purple-600 dark:text-purple-400">{formatUGX(product.potential_sales_value)}</p>
+                  </div>
+                  <div className="bg-card p-4">
                     <p className="text-xs text-muted-foreground mb-1">Low Stock Alert At</p>
                     <p className="font-semibold text-sm text-amber-600 dark:text-amber-400">{product.low_stock_threshold} units</p>
                   </div>

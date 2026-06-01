@@ -36,6 +36,11 @@ export function useCreateClient() {
 }
 
 // Sales
+export function usePartialPaymentCount() {
+  const { data } = useSales({ status: 'partial', limit: 1 });
+  return data?.count ?? 0;
+}
+
 export function useSales(filters = {}) {
   const branchId = useAuthStore((s) => s.profile?.branch_id);
   return useQuery({

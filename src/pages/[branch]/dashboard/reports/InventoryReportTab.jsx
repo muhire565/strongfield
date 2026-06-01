@@ -34,8 +34,8 @@ export default function InventoryReportTab() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card icon={TrendingUp} label="Total Products" value={d.total_products} color="text-blue-400" />
         <Card icon={TrendingUp} label="Total Units" value={d.total_units} color="text-emerald-400" />
-        <Card icon={TrendingUp} label="Stock Value (Sell)" value={`USh ${formatUGX(d.total_stock_value)}`} color="text-purple-400" />
-        <Card icon={TrendingDown} label="Stock Value (Cost)" value={`USh ${formatUGX(d.total_cost_value)}`} color="text-orange-400" />
+        <Card icon={TrendingUp} label="Potential Sales Value" value={`USh ${formatUGX(d.total_stock_value)}`} color="text-purple-400" />
+        <Card icon={TrendingDown} label="Stock Value" value={`USh ${formatUGX(d.total_cost_value)}`} color="text-orange-400" />
       </div>
 
       {/* Movement Summary */}

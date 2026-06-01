@@ -311,7 +311,7 @@ export default function NewSalePage() {
       </div>
 
       {/* ── RIGHT: Cart & Checkout ── */}
-      <div className="w-full lg:w-[450px] flex flex-col bg-card rounded-xl border border-border shadow-sm">
+      <div className="w-full lg:w-[450px] flex flex-col bg-card rounded-xl border border-border shadow-sm lg:self-start">
 
         {/* Header */}
         <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
@@ -375,7 +375,7 @@ export default function NewSalePage() {
         </div>
 
         {/* Cart items */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-[160px]">
+        <div className="overflow-y-auto p-4 space-y-2 min-h-[160px] max-h-[40vh]">
           <AnimatePresence>
             {cart.length === 0 && (
               <motion.div

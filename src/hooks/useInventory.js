@@ -51,17 +51,21 @@ export function useStockIn() {
 
       // Optimistic: increment quantity
       queryClient.setQueriesData({ queryKey: ['inventory'], exact: false }, (prev) => {
-        if (!Array.isArray(prev)) return prev;
-        return prev.map((p) => {
+        if (!prev) return prev;
+        const list = Array.isArray(prev) ? prev : (prev.data || []);
+        if (!Array.isArray(list)) return prev;
+        const updated = list.map((p) => {
           if (p.id !== productId) return p;
           const newQty = p.quantity + data.quantity;
           return {
             ...p,
             quantity: newQty,
-            stock_value: parseFloat((p.price * newQty).toFixed(2)),
+            stock_value: parseFloat(((p.purchase_price || 0) * newQty).toFixed(2)),
+            potential_sales_value: parseFloat(((p.price || 0) * newQty).toFixed(2)),
             stock_status: getStockStatus(newQty, p.low_stock_threshold),
           };
         });
+        return Array.isArray(prev) ? updated : { ...prev, data: updated };
       });
 
       return { snapshot };
@@ -91,17 +95,21 @@ export function useStockOut() {
       const snapshot = queryClient.getQueriesData({ queryKey: ['inventory'], exact: false });
 
       queryClient.setQueriesData({ queryKey: ['inventory'], exact: false }, (prev) => {
-        if (!Array.isArray(prev)) return prev;
-        return prev.map((p) => {
+        if (!prev) return prev;
+        const list = Array.isArray(prev) ? prev : (prev.data || []);
+        if (!Array.isArray(list)) return prev;
+        const updated = list.map((p) => {
           if (p.id !== productId) return p;
           const newQty = Math.max(0, p.quantity - data.quantity);
           return {
             ...p,
             quantity: newQty,
-            stock_value: parseFloat((p.price * newQty).toFixed(2)),
+            stock_value: parseFloat(((p.purchase_price || 0) * newQty).toFixed(2)),
+            potential_sales_value: parseFloat(((p.price || 0) * newQty).toFixed(2)),
             stock_status: getStockStatus(newQty, p.low_stock_threshold),
           };
         });
+        return Array.isArray(prev) ? updated : { ...prev, data: updated };
       });
 
       return { snapshot };

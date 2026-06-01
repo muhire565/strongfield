@@ -1,22 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Download, Search, Loader2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useAllMovements } from '../../hooks/useStockMovements';
 import { MovementTypeBadge } from './MovementTypeBadge';
 import { inputClass } from '../ui/FormField';
 import Papa from 'papaparse';
+import Pagination from '../ui/Pagination';
 
 export function MovementHistoryTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('');
+  const [page, setPage] = useState(1);
+  const limit = 50;
 
   const { data: movementsData, isLoading } = useAllMovements({
-    limit: 100,
+    page,
+    limit,
     type: filterType || undefined,
     search: searchTerm || undefined,
   });
 
   const movements = movementsData?.data || [];
+  const total = movementsData?.count || 0;
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, filterType]);
 
   const types = [
     { label: 'All', value: '' },
@@ -64,13 +73,13 @@ export function MovementHistoryTable() {
               type="text"
               placeholder="Search product..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
               className={`${inputClass()} pl-9 w-full sm:w-64`}
             />
           </div>
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
+            onChange={(e) => { setFilterType(e.target.value); setPage(1); }}
             className={`${inputClass()} w-full sm:w-40`}
           >
             {types.map(t => (
@@ -161,6 +170,12 @@ export function MovementHistoryTable() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={total}
+          onChange={setPage}
+        />
       </div>
     </div>
   );

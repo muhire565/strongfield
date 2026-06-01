@@ -5,6 +5,7 @@ import { useClients } from '../../../../hooks/usePOS';
 import { usePOSRealtime } from '../../../../hooks/usePOSRealtime';
 import { useProducts } from '../../../../hooks/useProducts';
 import { Search, Filter, FileText, X, ArrowRightLeft, Ban, CheckCircle, Clock, Send, Plus, Trash2, PlusCircle, MinusCircle, CalendarDays, StickyNote, Printer } from 'lucide-react';
+import Pagination from '../../../../components/ui/Pagination';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { printQuotation } from '../../../../utils/pdfGenerator';
@@ -37,14 +38,22 @@ export default function QuotationsListPage() {
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const limit = 50;
   const [convertQuote, setConvertQuote] = useState(null);
   const [saleType, setSaleType] = useState('cash_sale');
   const [amountPaid, setAmountPaid] = useState('');
   const [paymentMode, setPaymentMode] = useState('cash');
   const [referenceNumber, setReferenceNumber] = useState('');
 
-  const { data: quotesData, isLoading } = useQuotations(statusFilter ? { status: statusFilter } : {});
-  const quotes = quotesData || [];
+  const { data: quotesData, isLoading } = useQuotations({
+    status: statusFilter || undefined,
+    search: search || undefined,
+    page,
+    limit,
+  });
+  const quotes = quotesData?.data || [];
+  const total = quotesData?.count || 0;
 
   const convertMut = useConvertQuotation();
   const cancelMut = useCancelQuotation();
@@ -152,14 +161,6 @@ export default function QuotationsListPage() {
     });
   };
 
-  const filteredQuotes = quotes.filter(q => {
-    if (!search) return true;
-    const lower = search.toLowerCase();
-    return q.quote_number?.toLowerCase().includes(lower) ||
-           q.client?.full_name?.toLowerCase().includes(lower) ||
-           q.client_name_snapshot?.toLowerCase().includes(lower);
-  });
-
   const handleCancel = (id) => {
     if (!window.confirm('Cancel this quotation?')) return;
     cancelMut.mutate(id);
@@ -216,7 +217,7 @@ export default function QuotationsListPage() {
               type="text"
               placeholder="Search by quote number or client..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pos-input w-full pl-10 pr-4 py-2 text-sm"
             />
           </div>
@@ -224,7 +225,7 @@ export default function QuotationsListPage() {
             <Filter size={18} className="text-muted-foreground" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="pos-input px-3 py-2 text-sm appearance-none pr-8"
             >
               <option value="">All Statuses</option>
@@ -254,10 +255,10 @@ export default function QuotationsListPage() {
             <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr><td colSpan="7" className="p-8 text-center text-muted-foreground">Loading quotations...</td></tr>
-              ) : filteredQuotes.length === 0 ? (
+              ) : quotes.length === 0 ? (
                 <tr><td colSpan="7" className="p-8 text-center text-muted-foreground">No quotations found.</td></tr>
               ) : (
-                filteredQuotes.map((q) => (
+                quotes.map((q) => (
                   <tr key={q.id} className="hover:bg-muted/30 transition-colors group">
                     <td className="p-4 font-medium text-foreground">
                       <div className="flex items-center space-x-2">
@@ -295,6 +296,12 @@ export default function QuotationsListPage() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={total}
+          onChange={setPage}
+        />
       </div>
 
       {/* Convert Modal */}

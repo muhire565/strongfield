@@ -37,7 +37,8 @@ export const inventoryService = {
     const query = params.toString();
     const url = `${API_URL}/inventory${query ? `?${query}` : ''}`;
     const json = await fetchWithAuth(url);
-    return json.data || [];
+    console.log('inventoryService.list response:', json);
+    return json;
   },
 
   async getOne(id) {
@@ -68,7 +69,7 @@ export const inventoryService = {
     if (filters.search) params.append('search', filters.search);
     const query = params.toString();
     const json = await fetchWithAuth(`${API_URL}/inventory/movements/all${query ? `?${query}` : ''}`);
-    return json.data || [];
+    return json;
   },
 
   async stockIn(productId, data) {

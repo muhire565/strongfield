@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import {
@@ -20,6 +20,7 @@ import DeleteConfirmDialog from './DeleteConfirmDialog';
 import ExportProductModal from './ExportProductModal';
 import ExportHistory from './ExportHistory';
 import { Package, Plus } from 'lucide-react';
+import Pagination from '../../components/ui/Pagination';
 
 function getStockStatus(quantity, threshold) {
   if (quantity === 0) return 'Out of Stock';
@@ -120,14 +121,16 @@ export default function ProductsPage() {
   const [sortKey, setSortKey] = useState('created_at');
   const [sortDir, setSortDir] = useState('desc');
   const [activeTab, setActiveTab] = useState('products');
+  const [page, setPage] = useState(1);
+  const limit = 50;
 
   const [modalMode, setModalMode] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [exportTarget, setExportTarget] = useState(null);
 
-  // 250ms debounce as per spec
-  const debouncedSearch = useDebounce(search, 250);
+  // 100ms debounce for snappy search
+  const debouncedSearch = useDebounce(search, 100);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -172,6 +175,16 @@ export default function ProductsPage() {
 
     return result;
   }, [products, debouncedSearch, statusFilter, sortKey, sortDir]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter, sortKey, sortDir]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (page - 1) * limit;
+    return filteredProducts.slice(start, start + limit);
+  }, [filteredProducts, page, limit]);
 
   const handleSort = useCallback(
     (key) => {
@@ -248,7 +261,7 @@ export default function ProductsPage() {
             onStatusFilterChange={setStatusFilter}
             onAddClick={handleAdd}
           />
-          <ProductsStatsBar products={products} />
+          <ProductsStatsBar />
         </>
       )}
 
@@ -290,15 +303,24 @@ export default function ProductsPage() {
             ) : filteredProducts.length === 0 ? (
               <EmptyState searchQuery={debouncedSearch} onAddProduct={handleAdd} />
             ) : (
-              <ProductsTable
-                products={filteredProducts}
-                sortKey={sortKey}
-                sortDir={sortDir}
-                onSort={handleSort}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onExport={handleExport}
-              />
+              <>
+                <ProductsTable
+                  products={paginatedProducts}
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  onSort={handleSort}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onExport={handleExport}
+                  pageOffset={(page - 1) * limit}
+                />
+                <Pagination
+                  page={page}
+                  limit={limit}
+                  total={filteredProducts.length}
+                  onChange={setPage}
+                />
+              </>
             )}
           </motion.div>
         )}

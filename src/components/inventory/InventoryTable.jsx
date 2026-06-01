@@ -12,7 +12,8 @@ export function InventoryTable({
   onStockOut, 
   onEdit, 
   onDelete, 
-  onRowClick 
+  onRowClick,
+  pageOffset = 0
 }) {
   if (isLoading) {
     return (
@@ -45,6 +46,7 @@ export function InventoryTable({
               <th className="px-4 py-3 font-medium">Qty</th>
               <th className="px-4 py-3 font-medium text-center">Low Stock Alert</th>
               <th className="px-4 py-3 font-medium">Stock Value</th>
+              <th className="px-4 py-3 font-medium">Potential Sales Value</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Last Updated</th>
               <th className="px-4 py-3 font-medium text-center">Actions</th>
@@ -66,7 +68,7 @@ export function InventoryTable({
                     className="hover:bg-muted/30 transition-colors group cursor-pointer"
                     onClick={() => onRowClick(product)}
                   >
-                    <td className="px-4 py-3 text-muted-foreground">{index + 1}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{pageOffset + index + 1}</td>
                     <td className="px-4 py-3 font-medium text-foreground">{product.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">{product.brand}</td>
                     <td className="px-4 py-3 text-muted-foreground">{product.model}</td>
@@ -80,6 +82,9 @@ export function InventoryTable({
                     <td className="px-4 py-3 text-center text-muted-foreground">{product.low_stock_threshold}</td>
                     <td className="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400">
                       {formatUGX(product.stock_value)}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-purple-600 dark:text-purple-400">
+                      {formatUGX(product.potential_sales_value)}
                     </td>
                     <td className="px-4 py-3">
                       <StockStatusBadge status={product.stock_status} />
