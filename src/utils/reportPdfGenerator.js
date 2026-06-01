@@ -9,29 +9,47 @@ const fmt = (v) => {
 
 const currency = (v) => `UGX ${fmt(v)}`;
 
+function getLogoUrl() {
+  try {
+    return `${window.location.origin}/logo.jpeg`;
+  } catch {
+    return '/logo.jpeg';
+  }
+}
+
 function buildPage(title, subtitle, bodyHtml) {
+  const logoUrl = getLogoUrl();
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>${title}</title>
 <style>
   * { box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 30px 40px; color: #1f2937; line-height: 1.5; font-size: 12px; }
-  .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-  .brand { display: flex; align-items: flex-start; gap: 10px; }
-  .brand img { width: 48px; height: 48px; object-fit: contain; }
-  .brand-info h2 { margin: 0; font-size: 14px; font-weight: 700; color: #1f2937; }
-  .brand-info p { margin: 1px 0; font-size: 10px; color: #4b5563; line-height: 1.3; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 28px 36px; color: #1f2937; line-height: 1.45; font-size: 11.5px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .brand { display: flex; align-items: flex-start; gap: 12px; }
+  .brand img { width: 52px; height: 52px; object-fit: contain; border-radius: 4px; }
+  .brand-info h2 { margin: 0; font-size: 15px; font-weight: 700; color: #1f2937; letter-spacing: -0.2px; }
+  .brand-info p { margin: 1px 0; font-size: 10px; color: #4b5563; line-height: 1.35; }
   .doc-title { text-align: right; }
-  .doc-title h1 { margin: 0; font-size: 22px; font-weight: 800; color: #1f2937; letter-spacing: 1px; text-transform: uppercase; }
-  .doc-title .sub { margin-top: 3px; font-size: 11px; color: #6b7280; }
-  .divider { height: 2px; background: #3b82f6; margin: 10px 0 18px; }
-  h2.section { font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .doc-title h1 { margin: 0; font-size: 24px; font-weight: 800; color: #1f2937; letter-spacing: 1.5px; text-transform: uppercase; }
+  .doc-title .sub { margin-top: 4px; font-size: 11px; color: #6b7280; }
+  .divider { height: 3px; background: #1e40af; margin: 10px 0 20px; border-radius: 2px; }
+  h2.section { font-size: 11px; font-weight: 700; color: #1e3a8a; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 6px; padding-bottom: 4px; border-bottom: 2px solid #1e40af; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
   thead tr { background: #1e293b; }
-  th { color: #fff; font-size: 11px; font-weight: 600; padding: 8px 10px; text-align: left; border: 1px solid #1e293b; }
+  th { color: #fff; font-size: 10.5px; font-weight: 600; padding: 8px 10px; text-align: left; border: 1px solid #1e293b; }
   th.text-right, td.text-right { text-align: right; }
   td { padding: 7px 10px; border: 1px solid #e5e7eb; font-size: 11px; color: #374151; vertical-align: top; }
-  tbody tr:nth-child(even) { background: #f9fafb; }
-  tbody tr:last-child td { border-bottom: 1px solid #9ca3af; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  tbody tr:last-child td { border-bottom: 1px solid #94a3b8; }
+  .bs-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  .bs-table td { padding: 6px 10px; border: none; font-size: 11px; color: #374151; vertical-align: top; }
+  .bs-table td:first-child { width: 60%; }
+  .bs-table td:last-child { width: 40%; text-align: right; font-variant-numeric: tabular-nums; }
+  .bs-table tr.indent td:first-child { padding-left: 24px; color: #4b5563; }
+  .bs-table tr.subtotal td { border-top: 1px solid #cbd5e1; padding-top: 7px; font-weight: 600; color: #1f2937; }
+  .bs-table tr.total td { border-top: 2px solid #1e40af; padding-top: 8px; font-weight: 700; color: #1e3a8a; font-size: 11.5px; }
+  .bs-table tr.neg td:last-child { color: #b91c1c; }
+  .bs-table tr.spacer td { padding: 2px 0; }
   .row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 11px; color: #374151; }
   .row.bold { font-weight: 700; color: #1f2937; }
   .row.indent { padding-left: 20px; }
@@ -43,20 +61,20 @@ function buildPage(title, subtitle, bodyHtml) {
   .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
   .badge-green { background: #d1fae5; color: #065f46; }
   .badge-red { background: #fee2e2; color: #991b1b; }
-  .alert { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
-  .alert-ok { background: #d1fae5; color: #065f46; }
-  .alert-warn { background: #fee2e2; color: #991b1b; }
+  .alert { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-bottom: 16px; border-left: 4px solid; }
+  .alert-ok { background: #ecfdf5; color: #065f46; border-color: #10b981; }
+  .alert-warn { background: #fef2f2; color: #991b1b; border-color: #ef4444; }
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
-  .kpi-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; text-align: center; }
-  .kpi-label { font-size: 10px; color: #6b7280; margin-bottom: 4px; }
-  .kpi-value { font-size: 16px; font-weight: 700; color: #1f2937; }
-  .footer { margin-top: 30px; font-size: 9px; color: #6b7280; line-height: 1.4; border-top: 1px solid #e5e7eb; padding-top: 10px; }
-  @media print { body { padding: 20px 30px; } button { display: none !important; } }
+  .kpi-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center; background: #f8fafc; }
+  .kpi-label { font-size: 10px; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .kpi-value { font-size: 16px; font-weight: 700; color: #1e293b; }
+  .footer { margin-top: 36px; font-size: 9px; color: #64748b; line-height: 1.5; border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; }
+  @media print { body { padding: 20px 28px; } button { display: none !important; } }
 </style></head>
 <body>
   <div class="top">
     <div class="brand">
-      <img src="/logo.png" alt="Logo" />
+      <img src="${logoUrl}" alt="Logo" />
       <div class="brand-info">
         <h2>StrongField Electrical Centre</h2>
         <p>TIN No: 1015192270</p>
@@ -111,6 +129,22 @@ export function printIncomeStatementReport(data) {
   openWindow(buildPage('Income Statement', `Period: ${d.period?.from || ''} to ${d.period?.to || ''}`, body));
 }
 
+function bsRow(label, value, type = 'normal') {
+  const classes = {
+    normal: '',
+    indent: 'indent',
+    subtotal: 'subtotal',
+    total: 'total',
+    neg: 'neg',
+  };
+  const cls = classes[type] || '';
+  return `<tr class="${cls}"><td>${label}</td><td>${currency(value)}</td></tr>`;
+}
+
+function bsSpacer() {
+  return '<tr class="spacer"><td></td><td></td></tr>';
+}
+
 export function printBalanceSheetReport(data) {
   const d = data || {};
   const assets = d.assets || {};
@@ -121,28 +155,41 @@ export function printBalanceSheetReport(data) {
   const eq = d.equity || {};
   const alert = d.balanced
     ? `<div class="alert alert-ok">Balance Sheet is BALANCED</div>`
-    : `<div class="alert alert-warn">Balance sheet discrepancy detected. Total Assets ≠ Liabilities + Equity.</div>`;
+    : `<div class="alert alert-warn">Balance sheet discrepancy detected. Total Assets &ne; Liabilities + Equity.</div>`;
+
   const body = `${alert}
     <h2 class="section">Assets</h2>
-    <div class="row indent"><span>Cash on Hand</span><span>${currency(cash.cash)}</span></div>
-    <div class="row indent"><span>MTN Mobile Money</span><span>${currency(cash.mtn_mobile_money)}</span></div>
-    <div class="row indent"><span>Airtel Money</span><span>${currency(cash.airtel_money)}</span></div>
-    <div class="row indent"><span>Bank Transfer</span><span>${currency(cash.bank_transfer)}</span></div>
-    <div class="row subtotal"><span>Total Cash & Equivalents</span><span>${currency(cash.total)}</span></div>
-    <div class="row indent"><span>Accounts Receivable</span><span>${currency(ca.accounts_receivable)}</span></div>
-    <div class="row indent"><span>Inventory at Cost</span><span>${currency(ca.inventory_value)}</span></div>
-    <div class="row subtotal"><span>Total Current Assets</span><span>${currency(ca.total_current_assets)}</span></div>
-    <div class="row total"><span>TOTAL ASSETS</span><span>${currency(assets.total_assets)}</span></div>
+    <table class="bs-table">
+      ${bsRow('Cash on Hand', cash.cash, 'indent')}
+      ${bsRow('MTN Mobile Money', cash.mtn_mobile_money, 'indent')}
+      ${bsRow('Airtel Money', cash.airtel_money, 'indent')}
+      ${bsRow('Bank Transfer', cash.bank_transfer, 'indent')}
+      ${bsRow('Total Cash & Equivalents', cash.total, 'subtotal')}
+      ${bsSpacer()}
+      ${bsRow('Accounts Receivable', ca.accounts_receivable, 'indent')}
+      ${bsRow('Inventory at Cost', ca.inventory_value, 'indent')}
+      ${bsRow('Total Current Assets', ca.total_current_assets, 'subtotal')}
+      ${bsSpacer()}
+      ${bsRow('TOTAL ASSETS', assets.total_assets, 'total')}
+    </table>
+
     <h2 class="section">Liabilities</h2>
-    <div class="row indent"><span>Accounts Payable</span><span>${currency(cl.accounts_payable)}</span></div>
-    <div class="row subtotal"><span>Total Current Liabilities</span><span>${currency(cl.total_current_liabilities)}</span></div>
-    <div class="row total"><span>TOTAL LIABILITIES</span><span>${currency(liab.total_liabilities)}</span></div>
+    <table class="bs-table">
+      ${bsRow('Accounts Payable', cl.accounts_payable, 'indent')}
+      ${bsRow('Total Current Liabilities', cl.total_current_liabilities, 'subtotal')}
+      ${bsSpacer()}
+      ${bsRow('TOTAL LIABILITIES', liab.total_liabilities, 'total')}
+    </table>
+
     <h2 class="section">Owner's Equity</h2>
-    <div class="row indent"><span>Capital Injected</span><span>${currency(eq.owner_capital_injected)}</span></div>
-    <div class="row indent"><span>Retained Earnings</span><span>${currency(eq.retained_earnings)}</span></div>
-    <div class="row indent"><span>Less: Owner Drawings</span><span class="neg">${currency(eq.owner_drawings)}</span></div>
-    <div class="row subtotal"><span>Net Owner's Equity</span><span>${currency(eq.net_equity)}</span></div>
-    <div class="row total"><span>TOTAL LIABILITIES + EQUITY</span><span>${currency(d.liabilities_plus_equity)}</span></div>
+    <table class="bs-table">
+      ${bsRow('Capital Injected', eq.owner_capital_injected, 'indent')}
+      ${bsRow('Retained Earnings', eq.retained_earnings, 'indent')}
+      ${bsRow('Less: Owner Drawings', eq.owner_drawings, 'indent')}
+      ${bsRow('Net Owner\'s Equity', eq.net_equity, 'subtotal')}
+      ${bsSpacer()}
+      ${bsRow('TOTAL LIABILITIES + EQUITY', d.liabilities_plus_equity, 'total')}
+    </table>
   `;
   openWindow(buildPage('Balance Sheet', `As at: ${d.as_at || ''}`, body));
 }

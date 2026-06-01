@@ -62,7 +62,7 @@ export const printInvoice = (sale, branchName = 'HIGHWAY') => {
     <body>
       <div class="top">
         <div class="brand">
-          <img src="/logo.png" alt="Logo" />
+          <img src="${window.location.origin}/logo.jpeg" alt="Logo" />
           <div class="brand-info">
             <h2>${displayName}</h2>
             <p>TIN No: 1015192270</p>
@@ -210,7 +210,7 @@ export const printQuotation = (quote, branchName = 'HIGHWAY') => {
     <body>
       <div class="top">
         <div class="brand">
-          <img src="/logo.png" alt="Logo" />
+          <img src="${window.location.origin}/logo.jpeg" alt="Logo" />
           <div class="brand-info">
             <h2>${displayName}</h2>
             <p>TIN No: 1015192270</p>
