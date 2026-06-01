@@ -4,11 +4,13 @@ import { useQuotations, useCreateQuotation, useConvertQuotation, useCancelQuotat
 import { useClients } from '../../../../hooks/usePOS';
 import { usePOSRealtime } from '../../../../hooks/usePOSRealtime';
 import { useProducts } from '../../../../hooks/useProducts';
-import { Search, Filter, FileText, X, ArrowRightLeft, Ban, CheckCircle, Clock, Send, Plus, Trash2, PlusCircle, MinusCircle, CalendarDays, StickyNote, Printer } from 'lucide-react';
+import { Search, Filter, FileText, X, ArrowRightLeft, Ban, CheckCircle, Clock, Send, Plus, Trash2, PlusCircle, MinusCircle, CalendarDays, StickyNote, Printer, MessageCircle } from 'lucide-react';
 import Pagination from '../../../../components/ui/Pagination';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { printQuotation } from '../../../../utils/pdfGenerator';
+import { openWhatsApp, buildQuotationSummary, downloadBlob, shareFile } from '../../../../utils/shareUtils';
+import { generateQuotationPdfBlob } from '../../../../utils/pdfBlobGenerator';
 import { posService } from '../../../../services/posService';
 
 const formatCurrency = (val) => new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(val);
@@ -175,6 +177,30 @@ export default function QuotationsListPage() {
     }
   };
 
+  const handleShareQuote = async (id) => {
+    try {
+      const quote = await posService.getQuotation(id);
+      openWhatsApp({ text: buildQuotationSummary(quote) });
+    } catch (err) {
+      toast.error('Failed to load quotation for sharing');
+    }
+  };
+
+  const handleSharePdfQuote = async (id) => {
+    try {
+      const quote = await posService.getQuotation(id);
+      const blob = generateQuotationPdfBlob(quote);
+      const filename = `Quotation_${quote.quote_number || id}.pdf`;
+      const shared = await shareFile(blob, filename, `Quotation ${quote.quote_number}`);
+      if (!shared) {
+        downloadBlob(blob, filename);
+        toast.success('PDF downloaded. Attach it in WhatsApp to share.');
+      }
+    } catch {
+      toast.error('Failed to generate quotation PDF');
+    }
+  };
+
   const handleConvert = () => {
     if (!convertQuote) return;
     const amt = parseFloat(amountPaid) || 0;
@@ -285,9 +311,17 @@ export default function QuotationsListPage() {
                         <span className="text-xs text-muted-foreground">→ {q.converted_to_sale_id}</span>
                       )}
                       {q.status !== 'cancelled' && (
-                        <button onClick={() => handlePrintQuote(q.id)} className="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80 transition-colors inline-flex items-center gap-1">
-                          <Printer size={12} /> Print
-                        </button>
+                        <>
+                          <button onClick={() => handlePrintQuote(q.id)} className="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80 transition-colors inline-flex items-center gap-1">
+                            <Printer size={12} /> Print
+                          </button>
+                          <button onClick={() => handleShareQuote(q.id)} className="text-xs px-2 py-1 bg-emerald-100 text-emerald-800 rounded hover:bg-emerald-200 transition-colors inline-flex items-center gap-1">
+                            <MessageCircle size={12} /> Text
+                          </button>
+                          <button onClick={() => handleSharePdfQuote(q.id)} className="text-xs px-2 py-1 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors inline-flex items-center gap-1">
+                            <FileText size={12} /> PDF
+                          </button>
+                        </>
                       )}
                     </td>
                   </tr>

@@ -6,6 +6,9 @@ import { Search, Filter, Receipt, MoreVertical, CheckCircle, Clock, XCircle, Cre
 import Pagination from '../../../../components/ui/Pagination';
 import { format } from 'date-fns';
 import { printInvoice } from '../../../../utils/pdfGenerator';
+import { ShareButton } from '../../../../components/share/ShareButton';
+import { buildInvoiceSummary } from '../../../../utils/shareUtils';
+import { generateInvoicePdfBlob } from '../../../../utils/pdfBlobGenerator';
 
 const formatCurrency = (val) => new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(val);
 
@@ -255,6 +258,15 @@ export default function SalesListPage() {
                     <Printer size={18} />
                     <span>Print Invoice</span>
                   </button>
+                  <ShareButton
+                    title={`Invoice ${detailSale.sale_number}`}
+                    shareText={buildInvoiceSummary(detailSale)}
+                    onPrint={() => printInvoice(detailSale)}
+                    generatePdf={() => generateInvoicePdfBlob(detailSale)}
+                    pdfFileName={`Invoice_${detailSale.sale_number}.pdf`}
+                    variant="primary"
+                    className="flex-1"
+                  />
                 </div>
 
                 {detailSale.status !== 'voided' && (

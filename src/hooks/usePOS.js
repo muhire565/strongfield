@@ -82,12 +82,14 @@ export function useRecordPayment() {
   return useMutation({
     mutationFn: ({ saleId, data }) => posService.recordPayment(saleId, data),
     onSuccess: (res) => {
+      console.log('recordPayment response:', res);
       queryClient.invalidateQueries({ queryKey: ['pos', 'sales'] });
       queryClient.invalidateQueries({ queryKey: ['pos', 'sale'] });
       queryClient.invalidateQueries({ queryKey: ['pos', 'clients'] });
       queryClient.invalidateQueries({ queryKey: ['pos', 'client'] });
       queryClient.invalidateQueries({ queryKey: ['pos', 'payments'] });
-      toast.success('Payment recorded', { description: `New Balance: UGX ${res.data.new_balance}` });
+      const newBalance = res?.data?.new_balance ?? 0;
+      toast.success('Payment recorded', { description: `New Balance: UGX ${newBalance}` });
     },
     onError: (err) => toast.error('Failed to record payment', { description: err.message }),
   });

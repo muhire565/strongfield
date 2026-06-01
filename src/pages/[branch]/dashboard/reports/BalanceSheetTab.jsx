@@ -1,9 +1,12 @@
 import React from 'react';
-import { Download, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useBalanceSheet } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
 import { printBalanceSheetReport } from '../../../../utils/reportPdfGenerator';
+import { generateBalanceSheetPdfBlob } from '../../../../utils/pdfBlobGenerator';
+import { ShareButton } from '../../../../components/share/ShareButton';
+import { buildBalanceSheetSummary } from '../../../../utils/shareUtils';
 
 function Section({ title, children }) {
   return (
@@ -84,10 +87,18 @@ export default function BalanceSheetTab() {
         <Row label="TOTAL LIABILITIES + EQUITY" value={d.liabilities_plus_equity} isTotal />
       </Section>
 
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-end mt-6 gap-2">
         <button onClick={() => printBalanceSheetReport(d)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
-          <Download className="w-4 h-4" /> Download PDF
+          Download PDF
         </button>
+        <ShareButton
+          title={`Balance Sheet — ${d.as_at}`}
+          shareText={buildBalanceSheetSummary(d)}
+          onPrint={() => printBalanceSheetReport(d)}
+          onDownload={() => printBalanceSheetReport(d)}
+          generatePdf={() => generateBalanceSheetPdfBlob(d)}
+          pdfFileName={`Balance_Sheet_${d.as_at}.pdf`}
+        />
       </div>
     </div>
   );

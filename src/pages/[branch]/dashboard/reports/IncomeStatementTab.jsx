@@ -1,9 +1,11 @@
 import React from 'react';
-import { Download } from 'lucide-react';
 import { useIncomeStatement } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
 import { formatUGX } from '../../../../utils/formatters';
 import { printIncomeStatementReport } from '../../../../utils/reportPdfGenerator';
+import { generateIncomeStatementPdfBlob } from '../../../../utils/pdfBlobGenerator';
+import { ShareButton } from '../../../../components/share/ShareButton';
+import { buildIncomeStatementSummary } from '../../../../utils/shareUtils';
 
 function Row({ label, value, indent = false, isTotal = false, isSub = false }) {
   return (
@@ -70,10 +72,18 @@ export default function IncomeStatementTab() {
         <Row label="" value={`${d.net_margin_pct}%`} />
       </div>
 
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-end mt-6 gap-2">
         <button onClick={() => printIncomeStatementReport(d)} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm">
-          <Download className="w-4 h-4" /> Download PDF
+          Download PDF
         </button>
+        <ShareButton
+          title={`Income Statement — ${d.period?.from} to ${d.period?.to}`}
+          shareText={buildIncomeStatementSummary(d)}
+          onPrint={() => printIncomeStatementReport(d)}
+          onDownload={() => printIncomeStatementReport(d)}
+          generatePdf={() => generateIncomeStatementPdfBlob(d)}
+          pdfFileName={`Income_Statement_${d.period?.from}_to_${d.period?.to}.pdf`}
+        />
       </div>
     </div>
   );
