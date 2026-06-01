@@ -196,7 +196,9 @@ export function useVoidSale() {
       queryClient.invalidateQueries({ queryKey: ['pos', 'sale'] });
       queryClient.invalidateQueries({ queryKey: ['pos', 'clients'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
-      toast.success('Sale voided');
+      queryClient.invalidateQueries({ queryKey: ['finance', 'balances'] });
+      queryClient.invalidateQueries({ queryKey: ['finance', 'transactions'] });
+      toast.success('Sale voided — stock and balances restored');
     },
     onError: (err) => toast.error('Failed to void sale', { description: err.message }),
   });
