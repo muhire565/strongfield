@@ -48,8 +48,10 @@ function useSidebarExpandState(key, defaultValue = true) {
   return [open, setOpen];
 }
 
-function ExpandableGroup({ label, icon: Icon, children, badge }) {
-  const [open, setOpen] = useSidebarExpandState(label, false);
+function ExpandableGroup({ label, icon: Icon, children, badge, autoExpandPaths = [] }) {
+  const location = useLocation();
+  const isActivePath = autoExpandPaths.some((p) => location.pathname.startsWith(p));
+  const [open, setOpen] = useSidebarExpandState(label, isActivePath);
   const hasBadge = badge != null && badge > 0;
 
   return (
@@ -194,7 +196,12 @@ function SidebarContent({ prefix, branchName, profile, lowStockCount, unreadCoun
         {/* POS section: visible to admin and sales */}
         {(isAdmin || isSales) && (
           <SidebarSection title="Point of Sale">
-            <ExpandableGroup label="POS" icon={ShoppingCart} badge={posBadge}>
+            <ExpandableGroup
+              label="POS"
+              icon={ShoppingCart}
+              badge={posBadge}
+              autoExpandPaths={[`${prefix}/dashboard/pos`]}
+            >
               <SidebarNavItem to={`${prefix}/dashboard/pos/new`} label="New Sale" onClick={onNavClick} />
               <SidebarNavItem to={`${prefix}/dashboard/pos/sales`} label="Sales" badge={posBadge} onClick={onNavClick} />
               <SidebarNavItem to={`${prefix}/dashboard/pos/quotations`} label="Quotations" onClick={onNavClick} />
@@ -218,7 +225,11 @@ function SidebarContent({ prefix, branchName, profile, lowStockCount, unreadCoun
         {/* Finance section: admin only */}
         {isAdmin && (
           <SidebarSection title="Finance">
-            <ExpandableGroup label="Finance" icon={Landmark}>
+            <ExpandableGroup
+              label="Finance"
+              icon={Landmark}
+              autoExpandPaths={[`${prefix}/dashboard/finance`]}
+            >
               <SidebarNavItem to={`${prefix}/dashboard/finance`} label="Overview" onClick={onNavClick} />
               <SidebarNavItem to={`${prefix}/dashboard/finance/capital`} label="Capital" onClick={onNavClick} />
               <SidebarNavItem to={`${prefix}/dashboard/finance/expenses`} label="Expenses" onClick={onNavClick} />

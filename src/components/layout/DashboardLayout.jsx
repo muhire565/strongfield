@@ -41,14 +41,14 @@ export default function DashboardLayout({ branchName }) {
     <div className="min-h-screen bg-background">
       <Sidebar branchName={branchName} mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
 
-      <div className="lg:ml-[240px] transition-all duration-300">
+      <div className="lg:ml-[240px] transition-all duration-300 flex flex-col min-h-screen">
         <TopBar
           title={getPageTitle(location.pathname)}
           branchName={branchName}
           onToggleMobileSidebar={() => setMobileOpen(true)}
         />
 
-        <main className="p-4 lg:p-8 min-h-[calc(100vh-64px)]">
+        <main className="flex-1 p-4 lg:p-8">
           <Outlet />
         </main>
       </div>
