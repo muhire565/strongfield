@@ -8,43 +8,46 @@ export function useRealtimeStatus() {
     const realtime = supabase.realtime;
     if (!realtime) return;
 
-    const handleOpen = () => setStatus('connected');
-    const handleClose = () => setStatus('disconnected');
-    const handleError = () => setStatus('error');
+    // In Supabase v2 the socket is lazy — force it open so we can actually track state
+    try {
+      realtime.connect();
+    } catch {
+      // ignore — may already be connecting
+    }
 
-    // Listen to socket-level events
-    realtime.onOpen?.(handleOpen);
-    realtime.onClose?.(handleClose);
-    realtime.onError?.(handleError);
-
-    // Poll safely - connectionState may be a method in some supabase-js versions
-    const interval = setInterval(() => {
+    const readState = () => {
       try {
         const raw = realtime.connectionState;
-        const state = typeof raw === 'function' ? raw() : raw;
-        if (state === 'open') setStatus('connected');
-        else if (state === 'closed') setStatus('disconnected');
-        else if (state === 'closing') setStatus('reconnecting');
+        return typeof raw === 'function' ? raw() : raw;
       } catch {
-        // ignore
+        return 'closed';
       }
-    }, 3000);
+    };
 
-    // Force-connect socket by subscribing a dummy channel
-    const channel = supabase.channel('__health__').subscribe((s) => {
-      if (s === 'SUBSCRIBED') setStatus('connected');
-      if (s === 'CHANNEL_ERROR') setStatus('error');
-      if (s === 'TIMED_OUT') setStatus('reconnecting');
-      if (s === 'CLOSED') setStatus('disconnected');
-    });
+    const sync = () => {
+      const state = readState();
+      if (state === 'open') setStatus('connected');
+      else if (state === 'closed') setStatus('disconnected');
+      else if (state === 'closing') setStatus('reconnecting');
+      else setStatus('connecting');
+    };
 
-    // Don't hang on "connecting" forever
-    const timeout = setTimeout(() => {
-      setStatus((prev) => (prev === 'connecting' ? 'disconnected' : prev));
-    }, 10000);
+    sync();
+
+    // Poll frequently so the UI updates quickly
+    const interval = setInterval(sync, 2000);
+
+    // Subscribe a real channel — this is the most reliable signal in v2
+    const channel = supabase
+      .channel('__health__')
+      .subscribe((s) => {
+        if (s === 'SUBSCRIBED') setStatus('connected');
+        if (s === 'CLOSED') setStatus('disconnected');
+        if (s === 'CHANNEL_ERROR') setStatus('error');
+        if (s === 'TIMED_OUT') setStatus('reconnecting');
+      });
 
     return () => {
-      clearTimeout(timeout);
       clearInterval(interval);
       supabase.removeChannel(channel);
     };
