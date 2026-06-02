@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
@@ -10,6 +12,9 @@ function getAuthHeaders() {
 }
 
 export function useUsers() {
+  const queryClient = useQueryClient();
+  const branchId = useAuthStore((s) => s.profile?.branch_id);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
@@ -18,7 +23,28 @@ export function useUsers() {
       const json = await res.json();
       return json.data || [];
     },
+    refetchInterval: 30000,
   });
+
+  useEffect(() => {
+    if (!branchId) return;
+    const filter = `branch_id=eq.${branchId}`;
+    const channel = supabase
+      .channel('profiles-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['users'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [branchId, queryClient]);
+
   return { users: data, isLoading, error };
 }
 
