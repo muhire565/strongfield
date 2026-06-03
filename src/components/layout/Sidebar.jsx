@@ -235,6 +235,7 @@ function SidebarContent({ prefix, branchName, profile, lowStockCount, unreadCoun
               <SidebarNavItem to={`${prefix}/dashboard/finance/expenses`} label="Expenses" onClick={onNavClick} />
               <SidebarNavItem to={`${prefix}/dashboard/finance/withdrawals`} label="Withdrawals" onClick={onNavClick} />
               <SidebarNavItem to={`${prefix}/dashboard/finance/purchases`} label="Purchases" onClick={onNavClick} />
+              <SidebarNavItem to={`${prefix}/dashboard/finance/suppliers`} label="Suppliers" onClick={onNavClick} />
               <SidebarNavItem to={`${prefix}/dashboard/finance/ledger`} label="Ledger" onClick={onNavClick} />
             </ExpandableGroup>
           </SidebarSection>

@@ -92,8 +92,53 @@ export function useRecordPurchase() {
       qc.invalidateQueries({ queryKey: ['finance', 'purchases'] });
       qc.invalidateQueries({ queryKey: ['finance', 'transactions'] });
       qc.invalidateQueries({ queryKey: ['finance', 'summary'] });
+      qc.invalidateQueries({ queryKey: ['finance', 'suppliers'] });
     },
     onError: (err) => toast.error(err.message || 'Failed to record purchase'),
+  });
+}
+
+export function useSuppliers(params = {}) {
+  return useQuery({
+    queryKey: ['finance', 'suppliers', params],
+    queryFn: () => financeService.listSuppliers(params).then(r => ({ data: r.data, count: r.count })),
+  });
+}
+
+export function useSupplier(id) {
+  return useQuery({
+    queryKey: ['finance', 'supplier', id],
+    queryFn: () => financeService.getSupplier(id).then(r => r.data),
+    enabled: !!id,
+  });
+}
+
+export function useCreateSupplier() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: financeService.createSupplier,
+    onSuccess: () => {
+      toast.success('Supplier created');
+      qc.invalidateQueries({ queryKey: ['finance', 'suppliers'] });
+    },
+    onError: (err) => toast.error(err.message || 'Failed to create supplier'),
+  });
+}
+
+export function useSupplierPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }) => financeService.supplierPayment(id, body),
+    onSuccess: (_, vars) => {
+      toast.success('Supplier payment recorded');
+      qc.invalidateQueries({ queryKey: ['finance', 'suppliers'] });
+      qc.invalidateQueries({ queryKey: ['finance', 'supplier', vars.id] });
+      qc.invalidateQueries({ queryKey: ['finance', 'balances'] });
+      qc.invalidateQueries({ queryKey: ['finance', 'transactions'] });
+      qc.invalidateQueries({ queryKey: ['finance', 'purchases'] });
+      qc.invalidateQueries({ queryKey: ['finance', 'summary'] });
+    },
+    onError: (err) => toast.error(err.message || 'Payment failed'),
   });
 }
 

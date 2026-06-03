@@ -24,6 +24,7 @@ function getPageTitle(pathname) {
     expenses: 'Expenses',
     withdrawals: 'Withdrawals',
     purchases: 'Purchases',
+    suppliers: 'Suppliers',
     ledger: 'Ledger',
     reports: 'Reports',
   };

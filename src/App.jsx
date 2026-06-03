@@ -34,6 +34,7 @@ const CapitalPage = lazy(() => import('./pages/[branch]/dashboard/finance/Capita
 const ExpensesPage = lazy(() => import('./pages/[branch]/dashboard/finance/ExpensesPage'));
 const WithdrawalsPage = lazy(() => import('./pages/[branch]/dashboard/finance/WithdrawalsPage'));
 const PurchasesPage = lazy(() => import('./pages/[branch]/dashboard/finance/PurchasesPage'));
+const SuppliersPage = lazy(() => import('./pages/[branch]/dashboard/finance/SuppliersPage'));
 const LedgerPage = lazy(() => import('./pages/[branch]/dashboard/finance/LedgerPage'));
 const OverviewPage = lazy(() => import('./pages/[branch]/dashboard/OverviewPage'));
 const ReportsPage = lazy(() => import('./pages/[branch]/dashboard/reports/ReportsPage'));
@@ -127,6 +128,9 @@ function App() {
             <Route path="dashboard/finance/purchases" element={
               <Suspense fallback={<LoadingFallback />}><PurchasesPage /></Suspense>
             } />
+            <Route path="dashboard/finance/suppliers" element={
+              <Suspense fallback={<LoadingFallback />}><SuppliersPage /></Suspense>
+            } />
             <Route path="dashboard/finance/ledger" element={
               <Suspense fallback={<LoadingFallback />}><LedgerPage /></Suspense>
             } />
@@ -199,6 +203,9 @@ function App() {
             } />
             <Route path="dashboard/finance/purchases" element={
               <Suspense fallback={<LoadingFallback />}><PurchasesPage /></Suspense>
+            } />
+            <Route path="dashboard/finance/suppliers" element={
+              <Suspense fallback={<LoadingFallback />}><SuppliersPage /></Suspense>
             } />
             <Route path="dashboard/finance/ledger" element={
               <Suspense fallback={<LoadingFallback />}><LedgerPage /></Suspense>

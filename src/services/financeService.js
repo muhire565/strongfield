@@ -53,6 +53,11 @@ export const financeService = {
   recordPurchase: (body) => fetchWithAuth(`${API_URL}/finance/purchases`, { method: 'POST', body: JSON.stringify(body) }),
   getPurchase: (id) => fetchWithAuth(`${API_URL}/finance/purchases/${id}`),
 
+  listSuppliers: (params = {}) => fetchWithAuth(`${API_URL}/finance/suppliers?${buildQuery(params)}`),
+  createSupplier: (body) => fetchWithAuth(`${API_URL}/finance/suppliers`, { method: 'POST', body: JSON.stringify(body) }),
+  getSupplier: (id) => fetchWithAuth(`${API_URL}/finance/suppliers/${id}`),
+  supplierPayment: (id, body) => fetchWithAuth(`${API_URL}/finance/suppliers/${id}/payments`, { method: 'POST', body: JSON.stringify(body) }),
+
   listTransactions: (params = {}) => fetchWithAuth(`${API_URL}/finance/transactions?${buildQuery(params)}`),
   getTransaction: (id) => fetchWithAuth(`${API_URL}/finance/transactions/${id}`),
 
