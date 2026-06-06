@@ -63,6 +63,7 @@ function SectionTitle({ icon: Icon, title, count }) {
 export default function OverviewPage() {
   const { profile } = useAuthStore();
   const branchId = profile?.branch_id;
+  const isStockManager = profile?.role === 'stock_manager';
 
   useFinanceRealtime(branchId);
 
@@ -135,7 +136,7 @@ export default function OverviewPage() {
         { icon: PackageX, label: 'Out of Stock', value: outOfStock.toString(), color: outOfStock > 0 ? 'text-red-500' : 'text-emerald-400', delay: 0.18 },
         { icon: AlertTriangle, label: 'Low Stock', value: lowStock.toString(), color: lowStock > 0 ? 'text-amber-400' : 'text-emerald-400', delay: 0.20 },
         { icon: Boxes, label: 'Total Products', value: totalProducts.toString(), color: 'text-blue-400', delay: 0.22 },
-        { icon: BarChart3, label: 'Stock Value', value: `USh ${formatUGX(stockValue)}`, color: 'text-purple-400', delay: 0.24 },
+        ...(!isStockManager ? [{ icon: BarChart3, label: 'Stock Value', value: `USh ${formatUGX(stockValue)}`, color: 'text-purple-400', delay: 0.24 }] : []),
       ]
     },
 
@@ -144,9 +145,9 @@ export default function OverviewPage() {
       section: 'Profitability',
       sectionIcon: TrendingUp,
       items: [
-        { icon: TrendingUp, label: 'Gross Profit', value: `USh ${formatUGX(grossProfit)}`, color: grossProfit >= 0 ? 'text-teal-400' : 'text-red-400', delay: 0.26 },
-        { icon: Activity, label: 'Net Profit', value: `USh ${formatUGX(netProfit)}`, color: netProfit >= 0 ? 'text-purple-400' : 'text-red-500', delay: 0.28 },
-        { icon: TrendingUp, label: 'Potential Profit (Stock)', value: `USh ${formatUGX(potentialProfit)}`, color: 'text-indigo-400', delay: 0.30 },
+        ...(!isStockManager ? [{ icon: TrendingUp, label: 'Gross Profit', value: `USh ${formatUGX(grossProfit)}`, color: grossProfit >= 0 ? 'text-teal-400' : 'text-red-400', delay: 0.26 }] : []),
+        ...(!isStockManager ? [{ icon: Activity, label: 'Net Profit', value: `USh ${formatUGX(netProfit)}`, color: netProfit >= 0 ? 'text-purple-400' : 'text-red-500', delay: 0.28 }] : []),
+        ...(!isStockManager ? [{ icon: TrendingUp, label: 'Potential Profit (Stock)', value: `USh ${formatUGX(potentialProfit)}`, color: 'text-indigo-400', delay: 0.30 }] : []),
       ]
     },
 

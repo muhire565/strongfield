@@ -2,12 +2,15 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowUpCircle, ArrowDownCircle, Pencil, ArrowRightLeft } from 'lucide-react';
 import { useProductDetail } from '../../hooks/useInventory';
+import { useAuthStore } from '../../store/authStore';
 import { formatUGX } from '../../utils/formatCurrency';
 import { StockStatusBadge } from './StockStatusBadge';
 import { MovementHistoryTimeline } from './MovementHistoryTimeline';
 
 export function ProductDetailPanel({ productId, isOpen, onClose, onStockIn, onStockOut }) {
   const { data: product, isLoading } = useProductDetail(productId);
+  const { profile } = useAuthStore();
+  const isStockManager = profile?.role === 'stock_manager';
 
   // Prevent closing when clicking inside the panel
   const handlePanelClick = (e) => e.stopPropagation();
@@ -80,14 +83,18 @@ export function ProductDetailPanel({ productId, isOpen, onClose, onStockIn, onSt
                     <p className="text-xs text-muted-foreground mb-1">Purchase Price</p>
                     <p className="font-semibold text-sm">{formatUGX(product.purchase_price)}</p>
                   </div>
-                  <div className="bg-card p-4">
-                    <p className="text-xs text-muted-foreground mb-1">Stock Value</p>
-                    <p className="font-semibold text-sm text-emerald-600 dark:text-emerald-400">{formatUGX(product.stock_value)}</p>
-                  </div>
-                  <div className="bg-card p-4">
-                    <p className="text-xs text-muted-foreground mb-1">Potential Sales Value</p>
-                    <p className="font-semibold text-sm text-purple-600 dark:text-purple-400">{formatUGX(product.potential_sales_value)}</p>
-                  </div>
+                  {!isStockManager && (
+                    <div className="bg-card p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Stock Value</p>
+                      <p className="font-semibold text-sm text-emerald-600 dark:text-emerald-400">{formatUGX(product.stock_value)}</p>
+                    </div>
+                  )}
+                  {!isStockManager && (
+                    <div className="bg-card p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Potential Sales Value</p>
+                      <p className="font-semibold text-sm text-purple-600 dark:text-purple-400">{formatUGX(product.potential_sales_value)}</p>
+                    </div>
+                  )}
                   <div className="bg-card p-4">
                     <p className="text-xs text-muted-foreground mb-1">Low Stock Alert At</p>
                     <p className="font-semibold text-sm text-amber-600 dark:text-amber-400">{product.low_stock_threshold} units</p>

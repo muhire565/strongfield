@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Package, AlertTriangle, XCircle, TrendingUp, Banknote } from 'lucide-react';
+import { Package, AlertTriangle, XCircle, TrendingUp, Banknote, PackageCheck } from 'lucide-react';
 import { formatUGX } from '../../utils/formatCurrency';
 import { useInventorySummary } from '../../hooks/useInventory';
+import { useAuthStore } from '../../store/authStore';
 
 // Smooth animated number counter using requestAnimationFrame
 function AnimatedNumber({ value, prefix = '', suffix = '' }) {
@@ -76,6 +77,8 @@ const cardVariants = {
 
 export default function InventoryStatsBar() {
   const { data: summary } = useInventorySummary();
+  const { profile } = useAuthStore();
+  const isStockManager = profile?.role === 'stock_manager';
 
   const stats = summary || { total: 0, lowStock: 0, outOfStock: 0, stockValue: 0, potentialSalesValue: 0 };
 
@@ -88,22 +91,22 @@ export default function InventoryStatsBar() {
       icon:      Package,
       value:     <AnimatedNumber value={stats.total} />,
     },
-    {
+    ...(!isStockManager ? [{
       label:     'Stock Value',
       iconBg:    'bg-emerald-100 dark:bg-emerald-900/40',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
       valueColor:'text-emerald-700 dark:text-emerald-300',
       icon:      TrendingUp,
       value:     <AnimatedCurrency value={stats.stockValue} />,
-    },
-    {
+    }] : []),
+    ...(!isStockManager ? [{
       label:     'Potential Sales Value',
       iconBg:    'bg-purple-100 dark:bg-purple-900/40',
       iconColor: 'text-purple-600 dark:text-purple-400',
       valueColor:'text-purple-700 dark:text-purple-300',
       icon:      Banknote,
       value:     <AnimatedCurrency value={stats.potentialSalesValue} />,
-    },
+    }] : []),
     {
       label:     'In Stock',
       iconBg:    'bg-emerald-100 dark:bg-emerald-900/40',

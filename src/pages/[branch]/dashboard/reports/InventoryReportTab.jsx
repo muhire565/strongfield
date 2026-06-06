@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertTriangle, PackageX, TrendingUp, TrendingDown, Download } from 'lucide-react';
 import { useInventoryReport } from '../../../../hooks/useReports';
 import { useReportStore } from '../../../../store/useReportStore';
+import { useAuthStore } from '../../../../store/authStore';
 import { formatUGX } from '../../../../utils/formatters';
 import { printInventoryReport } from '../../../../utils/reportPdfGenerator';
 
@@ -20,6 +21,8 @@ function Card({ icon: Icon, label, value, color }) {
 export default function InventoryReportTab() {
   const { fromDate, toDate } = useReportStore();
   const { data, isLoading } = useInventoryReport(fromDate, toDate);
+  const { profile } = useAuthStore();
+  const isStockManager = profile?.role === 'stock_manager';
 
   if (isLoading) {
     return <div className="space-y-3">{[...Array(8)].map((_, i) => <div key={i} className="h-8 bg-muted rounded animate-pulse" />)}</div>;
@@ -31,11 +34,11 @@ export default function InventoryReportTab() {
   return (
     <div className="space-y-6">
       {/* Snapshot Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className={`grid gap-3 ${isStockManager ? 'grid-cols-2 sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'}`}>
         <Card icon={TrendingUp} label="Total Products" value={d.total_products} color="text-blue-400" />
         <Card icon={TrendingUp} label="Total Units" value={d.total_units} color="text-emerald-400" />
-        <Card icon={TrendingUp} label="Potential Sales Value" value={`USh ${formatUGX(d.total_stock_value)}`} color="text-purple-400" />
-        <Card icon={TrendingDown} label="Stock Value" value={`USh ${formatUGX(d.total_cost_value)}`} color="text-orange-400" />
+        {!isStockManager && <Card icon={TrendingUp} label="Potential Sales Value" value={`USh ${formatUGX(d.total_stock_value)}`} color="text-purple-400" />}
+        {!isStockManager && <Card icon={TrendingDown} label="Stock Value" value={`USh ${formatUGX(d.total_cost_value)}`} color="text-orange-400" />}
       </div>
 
       {/* Movement Summary */}
