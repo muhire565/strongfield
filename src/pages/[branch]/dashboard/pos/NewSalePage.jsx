@@ -518,7 +518,7 @@ export default function NewSalePage() {
       </div>
 
       {/* ══════════════════════════════════════════════
-         PREVIEW MODAL
+         PREVIEW MODAL — Receipt Style
       ══════════════════════════════════════════════ */}
       <AnimatePresence>
         {showPreview && (
@@ -531,105 +531,149 @@ export default function NewSalePage() {
               initial={{ scale: 0.92, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.92, opacity: 0, y: 20 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+              transition={{ type: 'spring', damping: 22, stiffness: 320 }}
+              className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="p-5 border-b border-border flex items-center justify-between bg-muted/30">
-                <div className="flex items-center gap-2">
-                  <Receipt className="text-primary" size={22} />
-                  <h2 className="text-lg font-bold">Sale Preview</h2>
+              {/* ── Receipt Header ── */}
+              <div className="relative bg-gradient-to-br from-primary/90 to-primary rounded-t-2xl p-6 text-primary-foreground text-center overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full opacity-10">
+                  <div className="absolute top-2 right-4 w-20 h-20 rounded-full bg-white/20" />
+                  <div className="absolute bottom-2 left-4 w-14 h-14 rounded-full bg-white/10" />
                 </div>
-                <button onClick={() => setShowPreview(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-                  <X size={18} />
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-primary-foreground"
+                >
+                  <X size={16} />
                 </button>
+                <Receipt size={32} className="mx-auto mb-2 opacity-90" />
+                <h2 className="text-xl font-bold">Sale Preview</h2>
+                <p className="text-xs opacity-80 mt-1">{profile?.branch_name || 'Branch'} &bull; {new Date().toLocaleDateString('en-UG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                <span className={`inline-block mt-3 px-3 py-0.5 rounded-full text-xs font-semibold ${
+                  saleType === 'cash_sale' ? 'bg-emerald-400/20 text-emerald-100' : 'bg-amber-400/20 text-amber-100'
+                }`}>
+                  {saleType === 'cash_sale' ? 'CASH SALE' : 'CREDIT SALE'}
+                </span>
               </div>
 
-              {/* Items */}
-              <div className="p-5 space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Items</h3>
-                <div className="space-y-2">
-                  {cart.map(item => (
-                    <div key={item.product_id} className="flex justify-between items-center p-3 bg-muted/40 rounded-lg border border-border">
-                      <div>
-                        <div className="font-medium text-sm">{item.product_name}</div>
-                        <div className="text-xs text-muted-foreground">{fmt(item.unit_price)} × {item.quantity}</div>
-                      </div>
-                      <div className="font-bold text-sm">{fmt(item.line_total)}</div>
-                    </div>
+              {/* ── Items Table ── */}
+              <div className="p-5">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-border text-muted-foreground text-xs uppercase tracking-wider">
+                      <th className="text-left py-2 font-medium">Qty</th>
+                      <th className="text-left py-2 font-medium">Item</th>
+                      <th className="text-right py-2 font-medium">Unit</th>
+                      <th className="text-right py-2 font-medium">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {cart.map(item => (
+                      <tr key={item.product_id} className="group">
+                        <td className="py-2.5 text-foreground font-bold">{item.quantity}</td>
+                        <td className="py-2.5">
+                          <div className="font-medium text-foreground leading-tight">{item.product_name}</div>
+                          {item.brand && <div className="text-[11px] text-muted-foreground">{item.brand} {item.model}</div>}
+                        </td>
+                        <td className="py-2.5 text-right text-muted-foreground">{fmt(item.unit_price)}</td>
+                        <td className="py-2.5 text-right font-bold text-foreground">{fmt(item.line_total)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* ── Dashed separator ── */}
+                <div className="flex items-center gap-1 my-4">
+                  {[...Array(24)].map((_, i) => (
+                    <div key={i} className="flex-1 h-[2px] bg-border rounded-full" />
                   ))}
                 </div>
 
-                {/* Totals */}
-                <div className="border-t border-border pt-3 space-y-2 text-sm">
+                {/* ── Totals ── */}
+                <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
                     <span className="font-medium text-foreground">{fmt(subtotal)}</span>
                   </div>
                   {discountAmount > 0 && (
-                    <div className="flex justify-between text-muted-foreground">
+                    <div className="flex justify-between text-green-600">
                       <span>Discount</span>
-                      <span className="font-medium text-green-600">- {fmt(discountAmount)}</span>
+                      <span className="font-medium">- {fmt(discountAmount)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-lg font-bold border-t border-border pt-2">
-                    <span>Total</span>
-                    <span className="text-primary">{fmt(totalAmount)}</span>
+                  <div className="flex justify-between items-end pt-2 border-t border-border">
+                    <span className="text-base font-bold text-foreground">Total Payable</span>
+                    <span className="text-2xl font-black text-primary">{fmt(totalAmount)}</span>
                   </div>
                 </div>
 
-                {/* Payment details */}
-                <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm border border-border">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Sale Type</span>
-                    <span className="font-medium">{saleType === 'cash_sale' ? 'Cash Sale' : 'Credit Sale'}</span>
+                {/* ── Dashed separator ── */}
+                <div className="flex items-center gap-1 my-4">
+                  {[...Array(24)].map((_, i) => (
+                    <div key={i} className="flex-1 h-[2px] bg-border rounded-full" />
+                  ))}
+                </div>
+
+                {/* ── Payment Summary ── */}
+                <div className="bg-muted/40 rounded-xl p-4 space-y-2 text-sm border border-border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Banknote size={14} />
+                      <span>Payment Mode</span>
+                    </div>
+                    <span className="font-semibold">{PAYMENT_MODES.find(m => m.id === paymentMode)?.label || paymentMode}</span>
                   </div>
                   {selectedClient && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Client</span>
-                      <span className="font-medium">{selectedClient.full_name}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Receipt size={14} />
+                        <span>Client</span>
+                      </div>
+                      <span className="font-semibold">{selectedClient.full_name}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Payment Mode</span>
-                    <span className="font-medium">{PAYMENT_MODES.find(m => m.id === paymentMode)?.label || paymentMode}</span>
-                  </div>
-                  <div className="flex justify-between">
+                  <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Amount Paid</span>
                     <span className="font-bold">{fmt(parseFloat(amountPaidStr) || 0)}</span>
                   </div>
                   {change > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Change</span>
-                      <span className="font-bold text-orange-500">{fmt(change)}</span>
+                    <div className="flex items-center justify-between bg-orange-500/10 rounded-lg px-3 py-2 -mx-1">
+                      <span className="text-orange-600 font-medium">Change to Give</span>
+                      <span className="font-black text-orange-600 text-base">{fmt(change)}</span>
                     </div>
                   )}
                   {balanceDue > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Balance Due</span>
-                      <span className="font-bold text-destructive">{fmt(balanceDue)}</span>
+                    <div className="flex items-center justify-between bg-destructive/10 rounded-lg px-3 py-2 -mx-1">
+                      <span className="text-destructive font-medium">Balance Due</span>
+                      <span className="font-black text-destructive text-base">{fmt(balanceDue)}</span>
+                    </div>
+                  )}
+                  {change === 0 && balanceDue === 0 && totalAmount > 0 && (
+                    <div className="flex items-center justify-center gap-1.5 bg-emerald-500/10 rounded-lg px-3 py-2 -mx-1 text-emerald-600">
+                      <Check size={14} strokeWidth={3} />
+                      <span className="font-semibold text-sm">Fully Paid</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="p-5 border-t border-border space-y-3 bg-muted/10">
+              {/* ── Actions ── */}
+              <div className="p-5 border-t border-border space-y-3 bg-muted/10 rounded-b-2xl">
                 <button
                   onClick={handleCheckout}
                   disabled={createSaleMut.isPending}
-                  className="w-full py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-40 flex items-center justify-center gap-2"
                 >
                   {createSaleMut.isPending ? (
                     <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Processing...</>
                   ) : (
-                    <><Check size={20} /> Confirm Sale</>
+                    <><Check size={22} strokeWidth={3} /> Confirm &amp; Print</>
                   )}
                 </button>
                 <button
                   onClick={() => setShowPreview(false)}
-                  className="w-full py-3 border border-border rounded-xl font-medium text-sm hover:bg-muted transition-colors"
+                  className="w-full py-3 border border-border rounded-xl font-medium text-sm hover:bg-muted transition-colors text-muted-foreground"
                 >
                   Back to Edit
                 </button>
