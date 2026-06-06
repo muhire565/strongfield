@@ -6,7 +6,7 @@ import { useCreateSale, useClients } from '../../../../hooks/usePOS';
 import { usePOSRealtime } from '../../../../hooks/usePOSRealtime';
 import {
   Search, ShoppingCart, Trash2, Plus, Minus, CreditCard,
-  Banknote, Check, CheckCircle2, Smartphone, RefreshCw, Receipt
+  Banknote, Check, CheckCircle2, Smartphone, RefreshCw, Receipt, Eye, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,6 +37,7 @@ export default function NewSalePage() {
   const [amountPaidStr, setAmountPaidStr]       = useState('');
   const [discountAmountStr, setDiscountAmountStr] = useState('');
   const [successSale, setSuccessSale] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const { data: productsData, isLoading: loadingProducts } = useProducts();
   const { data: clientsData } = useClients();
@@ -48,6 +49,15 @@ export default function NewSalePage() {
   useEffect(() => {
     localStorage.setItem(`pos_cart_${branchId}`, JSON.stringify(cart));
   }, [cart, branchId]);
+
+  // Auto-fill exact amount for cash sales (no Exact button needed)
+  useEffect(() => {
+    if (saleType === 'cash_sale') {
+      setAmountPaidStr(totalAmount > 0 ? totalAmount.toFixed(0) : '');
+    } else {
+      setAmountPaidStr('');
+    }
+  }, [subtotal, discountAmount, totalAmount, saleType]);
 
   /* ── Maths ── */
   const subtotal       = cart.reduce((a, i) => a + i.unit_price * i.quantity, 0);
@@ -115,14 +125,13 @@ export default function NewSalePage() {
     if (saleType === 'credit_sale' && !selectedClient)
       return toast.error('Select a client for credit sales');
 
-    // For cash: auto-use total if amount field left blank
     const effectivePaid = (amountPaidStr === '' && saleType === 'cash_sale')
       ? totalAmount : amountPaid;
 
     if (effectivePaid > totalAmount + 0.001)
       return toast.error('Amount paid cannot exceed the total');
     if (saleType === 'cash_sale' && effectivePaid < totalAmount - 0.001)
-      return toast.error('Cash sales must be paid in full — tap "Exact" to auto-fill');
+      return toast.error('Cash sales must be paid in full');
 
     createSaleMut.mutate({
       client_id: selectedClient?.id ?? null,
@@ -139,6 +148,7 @@ export default function NewSalePage() {
     }, {
       onSuccess: (data) => {
         setSuccessSale({ ...data, total_amount: totalAmount, amount_paid: effectivePaid });
+        setShowPreview(false);
         localStorage.removeItem(`pos_cart_${branchId}`);
       },
       onError: (err) => {
@@ -442,15 +452,7 @@ export default function NewSalePage() {
 
           {/* Amount Paid */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount Paid</label>
-              <button
-                onClick={() => setAmountPaidStr(totalAmount.toString())}
-                className="text-xs text-primary hover:underline font-semibold"
-              >
-                Exact ↗
-              </button>
-            </div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount Paid</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 font-semibold text-xs">UGX</span>
               <input
@@ -504,20 +506,138 @@ export default function NewSalePage() {
             </div>
           </div>
 
-          {/* Confirm button */}
+          {/* Preview button */}
           <button
-            onClick={handleCheckout}
-            disabled={createSaleMut.isPending || cart.length === 0}
+            onClick={() => setShowPreview(true)}
+            disabled={cart.length === 0}
             className="w-full py-4 bg-primary text-primary-foreground rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {createSaleMut.isPending ? (
-              <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Processing...</>
-            ) : (
-              <><Check size={20} /> Confirm Sale — {fmt(totalAmount)}</>
-            )}
+            <Eye size={20} /> Preview Sale — {fmt(totalAmount)}
           </button>
         </div>
       </div>
+
+      {/* ══════════════════════════════════════════════
+         PREVIEW MODAL
+      ══════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showPreview && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowPreview(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="p-5 border-b border-border flex items-center justify-between bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Receipt className="text-primary" size={22} />
+                  <h2 className="text-lg font-bold">Sale Preview</h2>
+                </div>
+                <button onClick={() => setShowPreview(false)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Items */}
+              <div className="p-5 space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Items</h3>
+                <div className="space-y-2">
+                  {cart.map(item => (
+                    <div key={item.product_id} className="flex justify-between items-center p-3 bg-muted/40 rounded-lg border border-border">
+                      <div>
+                        <div className="font-medium text-sm">{item.product_name}</div>
+                        <div className="text-xs text-muted-foreground">{fmt(item.unit_price)} × {item.quantity}</div>
+                      </div>
+                      <div className="font-bold text-sm">{fmt(item.line_total)}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Totals */}
+                <div className="border-t border-border pt-3 space-y-2 text-sm">
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span className="font-medium text-foreground">{fmt(subtotal)}</span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Discount</span>
+                      <span className="font-medium text-green-600">- {fmt(discountAmount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-lg font-bold border-t border-border pt-2">
+                    <span>Total</span>
+                    <span className="text-primary">{fmt(totalAmount)}</span>
+                  </div>
+                </div>
+
+                {/* Payment details */}
+                <div className="bg-muted/30 rounded-xl p-4 space-y-2 text-sm border border-border">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Sale Type</span>
+                    <span className="font-medium">{saleType === 'cash_sale' ? 'Cash Sale' : 'Credit Sale'}</span>
+                  </div>
+                  {selectedClient && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Client</span>
+                      <span className="font-medium">{selectedClient.full_name}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Payment Mode</span>
+                    <span className="font-medium">{PAYMENT_MODES.find(m => m.id === paymentMode)?.label || paymentMode}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Amount Paid</span>
+                    <span className="font-bold">{fmt(parseFloat(amountPaidStr) || 0)}</span>
+                  </div>
+                  {change > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Change</span>
+                      <span className="font-bold text-orange-500">{fmt(change)}</span>
+                    </div>
+                  )}
+                  {balanceDue > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Balance Due</span>
+                      <span className="font-bold text-destructive">{fmt(balanceDue)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="p-5 border-t border-border space-y-3 bg-muted/10">
+                <button
+                  onClick={handleCheckout}
+                  disabled={createSaleMut.isPending}
+                  className="w-full py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                >
+                  {createSaleMut.isPending ? (
+                    <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Processing...</>
+                  ) : (
+                    <><Check size={20} /> Confirm Sale</>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="w-full py-3 border border-border rounded-xl font-medium text-sm hover:bg-muted transition-colors"
+                >
+                  Back to Edit
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
