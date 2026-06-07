@@ -46,6 +46,14 @@ export default function NewSalePage() {
   const products = productsData || [];
   const clients  = clientsData  || [];
 
+  /* ── Maths ── */
+  const subtotal       = cart.reduce((a, i) => a + i.unit_price * i.quantity, 0);
+  const discountAmount = Math.max(0, parseFloat(discountAmountStr) || 0);
+  const totalAmount    = Math.max(0, subtotal - discountAmount);
+  const amountPaid     = parseFloat(amountPaidStr) || 0;
+  const balanceDue     = Math.max(0, totalAmount - amountPaid);
+  const change         = amountPaid > totalAmount ? amountPaid - totalAmount : 0;
+
   useEffect(() => {
     localStorage.setItem(`pos_cart_${branchId}`, JSON.stringify(cart));
   }, [cart, branchId]);
@@ -58,14 +66,6 @@ export default function NewSalePage() {
       setAmountPaidStr('');
     }
   }, [subtotal, discountAmount, totalAmount, saleType]);
-
-  /* ── Maths ── */
-  const subtotal       = cart.reduce((a, i) => a + i.unit_price * i.quantity, 0);
-  const discountAmount = Math.max(0, parseFloat(discountAmountStr) || 0);
-  const totalAmount    = Math.max(0, subtotal - discountAmount);
-  const amountPaid     = parseFloat(amountPaidStr) || 0;
-  const balanceDue     = Math.max(0, totalAmount - amountPaid);
-  const change         = amountPaid > totalAmount ? amountPaid - totalAmount : 0;
 
   /* ── Search filter ── */
   const filteredProducts = useMemo(() => {
