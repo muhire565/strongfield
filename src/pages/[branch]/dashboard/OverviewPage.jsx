@@ -103,8 +103,8 @@ export default function OverviewPage() {
 
   /* ── Card definitions (order of importance) ── */
   const cards = [
-    /* ===== SECTION 1: LIQUID MONEY (most important) ===== */
-    {
+    ...(!isStockManager ? [{
+      /* ===== SECTION 1: LIQUID MONEY (most important) ===== */
       section: 'Liquid Money',
       sectionIcon: Wallet,
       items: [
@@ -114,10 +114,10 @@ export default function OverviewPage() {
         { icon: Smartphone, label: 'Airtel Money', value: `USh ${formatUGX(balMap.airtel_money || 0)}`, color: 'text-red-400', delay: 0.06 },
         { icon: CreditCard, label: 'Bank Transfer', value: `USh ${formatUGX(balMap.bank_transfer || 0)}`, color: 'text-blue-400', delay: 0.08 },
       ]
-    },
+    }] : []),
 
-    /* ===== SECTION 2: TODAY'S BUSINESS ===== */
-    {
+    ...(!isStockManager ? [{
+      /* ===== SECTION 2: TODAY'S BUSINESS ===== */
       section: "Today's Business",
       sectionIcon: ShoppingCart,
       items: [
@@ -126,7 +126,7 @@ export default function OverviewPage() {
         { icon: ArrowDownLeft, label: 'Cash Collected', value: `USh ${formatUGX(posSummary?.cash || 0)}`, color: 'text-emerald-400', delay: 0.14 },
         { icon: ArrowDownLeft, label: 'MoMo Collected', value: `USh ${formatUGX((posSummary?.mtn_mobile_money || 0) + (posSummary?.airtel_money || 0))}`, color: 'text-yellow-400', delay: 0.16 },
       ]
-    },
+    }] : []),
 
     /* ===== SECTION 3: STOCK ALERTS ===== */
     {
@@ -140,19 +140,19 @@ export default function OverviewPage() {
       ]
     },
 
-    /* ===== SECTION 4: PROFITABILITY ===== */
-    {
+    ...(!isStockManager ? [{
+      /* ===== SECTION 4: PROFITABILITY ===== */
       section: 'Profitability',
       sectionIcon: TrendingUp,
       items: [
-        ...(!isStockManager ? [{ icon: TrendingUp, label: 'Gross Profit', value: `USh ${formatUGX(grossProfit)}`, color: grossProfit >= 0 ? 'text-teal-400' : 'text-red-400', delay: 0.26 }] : []),
-        ...(!isStockManager ? [{ icon: Activity, label: 'Net Profit', value: `USh ${formatUGX(netProfit)}`, color: netProfit >= 0 ? 'text-purple-400' : 'text-red-500', delay: 0.28 }] : []),
-        ...(!isStockManager ? [{ icon: TrendingUp, label: 'Potential Profit (Stock)', value: `USh ${formatUGX(potentialProfit)}`, color: 'text-indigo-400', delay: 0.30 }] : []),
+        { icon: TrendingUp, label: 'Gross Profit', value: `USh ${formatUGX(grossProfit)}`, color: grossProfit >= 0 ? 'text-teal-400' : 'text-red-400', delay: 0.26 },
+        { icon: Activity, label: 'Net Profit', value: `USh ${formatUGX(netProfit)}`, color: netProfit >= 0 ? 'text-purple-400' : 'text-red-500', delay: 0.28 },
+        { icon: TrendingUp, label: 'Potential Profit (Stock)', value: `USh ${formatUGX(potentialProfit)}`, color: 'text-indigo-400', delay: 0.30 },
       ]
-    },
+    }] : []),
 
-    /* ===== SECTION 5: FINANCIAL DEEP DIVE ===== */
-    {
+    ...(!isStockManager ? [{
+      /* ===== SECTION 5: FINANCIAL DEEP DIVE ===== */
       section: 'Financial Health',
       sectionIcon: Landmark,
       items: [
@@ -161,7 +161,7 @@ export default function OverviewPage() {
         { icon: ArrowUpRight, label: 'Total Expenses', value: `USh ${formatUGX(expenses)}`, color: 'text-red-400', delay: 0.36 },
         { icon: Wallet, label: 'Total Withdrawals', value: `USh ${formatUGX(withdrawals)}`, color: 'text-orange-400', delay: 0.38 },
       ]
-    },
+    }] : []),
 
   ];
 
