@@ -193,7 +193,7 @@ function SidebarContent({ prefix, branchName, profile, lowStockCount, unreadCoun
           )}
         </SidebarSection>
 
-        {/* POS section: visible to admin and sales */}
+        {/* POS section: visible to admin and sales only */}
         {(isAdmin || isSales) && (
           <SidebarSection title="Point of Sale">
             <ExpandableGroup
