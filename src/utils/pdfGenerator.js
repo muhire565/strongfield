@@ -65,10 +65,8 @@ export const printInvoice = (sale, branchName = 'HIGHWAY') => {
           <img src="${window.location.origin}/logo.jpeg" alt="Logo" />
           <div class="brand-info">
             <h2>${displayName}</h2>
-            <p>TIN No: 1015192270</p>
-            <p>Plot 46 Lubaas Road</p>
-            <p>Nge Estate 0026E, Uganda</p>
-            <p>mapeetersimon@yahoo.com</p>
+            <p>Location: Namaganga plaza</p>
+            <p>Email: mapetersimon@yahoo.com</p>
           </div>
         </div>
         <div class="doc-title">
@@ -141,7 +139,7 @@ export const printInvoice = (sale, branchName = 'HIGHWAY') => {
       <div class="footer">
         <p>Thank you for your business!</p>
         <p>Payment terms: Payment is due upon receipt unless otherwise specified.</p>
-        <p>Contact: mapeetersimon@yahoo.com</p>
+        <p>Contact: mapetersimon@yahoo.com</p>
       </div>
     </body>
     </html>
@@ -213,10 +211,8 @@ export const printQuotation = (quote, branchName = 'HIGHWAY') => {
           <img src="${window.location.origin}/logo.jpeg" alt="Logo" />
           <div class="brand-info">
             <h2>${displayName}</h2>
-            <p>TIN No: 1015192270</p>
-            <p>Plot 46 Lubaas Road</p>
-            <p>Nge Estate 0026E, Uganda</p>
-            <p>mapeetersimon@yahoo.com</p>
+            <p>Location: Namaganga plaza</p>
+            <p>Email: mapetersimon@yahoo.com</p>
           </div>
         </div>
         <div class="doc-title">
@@ -281,7 +277,7 @@ export const printQuotation = (quote, branchName = 'HIGHWAY') => {
       <div class="footer">
         <p>This quotation is not a tax invoice. Prices are subject to stock availability.</p>
         <p>Goods sold are not returnable unless agreed upon in writing.</p>
-        <p>Contact: mapeetersimon@yahoo.com</p>
+        <p>Contact: mapetersimon@yahoo.com</p>
       </div>
     </body>
     </html>

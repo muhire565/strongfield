@@ -111,6 +111,15 @@ export default function NewSalePage() {
     }));
   };
 
+  const updateUnitPrice = (id, newPrice) => {
+    setCart(prev => prev.map(item => {
+      if (item.product_id !== id) return item;
+      const price = parseFloat(newPrice);
+      const validPrice = isNaN(price) || price < 0 ? 0 : price;
+      return { ...item, unit_price: validPrice, line_total: item.quantity * validPrice };
+    }));
+  };
+
   const removeFromCart = (id) => setCart(prev => prev.filter(i => i.product_id !== id));
 
   const resetSale = () => {
@@ -364,7 +373,13 @@ export default function NewSalePage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <span className="font-medium text-foreground">{fmt(item.unit_price)}</span>
+                      <input 
+                        type="number"
+                        min="0"
+                        value={item.unit_price}
+                        onChange={(e) => updateUnitPrice(item.product_id, e.target.value)}
+                        className="w-28 text-right font-medium text-foreground bg-transparent border-b-2 border-transparent hover:border-muted-foreground/30 focus:border-primary focus:ring-0 outline-none transition-colors py-1 rounded-none m-0 p-0"
+                      />
                     </td>
                     <td className="px-4 py-4 text-right">
                       <span className="font-bold text-foreground">{fmt(item.line_total)}</span>
