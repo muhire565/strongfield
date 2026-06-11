@@ -43,7 +43,17 @@ export function useNotificationsRealtime() {
           const highPriority = ['out_of_stock', 'large_withdrawal', 'credit_balance_cleared'];
           const medPriority = ['low_stock', 'payment_received', 'sale_completed'];
 
-          if (highPriority.includes(notif.type)) {
+          if (notif.type === 'developer_message') {
+            toast(notif.title, {
+              description: notif.description,
+              duration: 10000,
+              style: {
+                background: '#4c1d95',
+                color: '#fff',
+                border: '1px solid #7c3aed',
+              }
+            });
+          } else if (highPriority.includes(notif.type)) {
             toast.warning(notif.title, { description: notif.description, duration: 6000 });
           } else if (medPriority.includes(notif.type)) {
             toast.info(notif.title, { description: notif.description, duration: 4000 });

@@ -174,6 +174,7 @@ function SidebarContent({ prefix, branchName, profile, lowStockCount, unreadCoun
   const isAdmin = role === 'admin';
   const isSales = role === 'sales';
   const isStockManager = role === 'stock_manager';
+  const isDeveloper = role === 'developer';
 
   return (
     <div className="flex flex-col h-full">
@@ -185,13 +186,22 @@ function SidebarContent({ prefix, branchName, profile, lowStockCount, unreadCoun
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-4 px-3">
-        {/* All roles: Overview */}
-        <SidebarSection>
-          <SidebarNavItem to={`${prefix}/dashboard`} icon={LayoutDashboard} label="Overview" exact onClick={onNavClick} />
-          {isAdmin && (
-            <SidebarNavItem to={`${prefix}/admin`} icon={Users} label="Users" onClick={onNavClick} />
-          )}
-        </SidebarSection>
+        {/* Developer Section */}
+        {isDeveloper && (
+          <SidebarSection>
+            <SidebarNavItem to={`${prefix}/dashboard`} icon={Users} label="User Management" exact onClick={onNavClick} />
+          </SidebarSection>
+        )}
+
+        {/* All roles: Overview (except developer) */}
+        {!isDeveloper && (
+          <SidebarSection>
+            <SidebarNavItem to={`${prefix}/dashboard`} icon={LayoutDashboard} label="Overview" exact onClick={onNavClick} />
+            {isAdmin && (
+              <SidebarNavItem to={`${prefix}/admin`} icon={Users} label="Users" onClick={onNavClick} />
+            )}
+          </SidebarSection>
+        )}
 
         {/* POS section: visible to admin and sales only */}
         {(isAdmin || isSales) && (

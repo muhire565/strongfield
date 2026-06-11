@@ -51,6 +51,7 @@ function BranchCard({ branch, accentColor, icon: Icon }) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
   const [branches] = useState([
     { id: '1', name: 'HIGHWAY', display_name: 'Highway Branch' },
     { id: '2', name: 'MAIN', display_name: 'Main Branch' }
@@ -90,6 +91,17 @@ export default function Home() {
             icon={Building2}
           />
         </div>
+      </div>
+      
+      {/* Developer Portal Link */}
+      <div className="absolute bottom-8 w-full flex justify-center z-20">
+        <button
+          onClick={() => navigate('/developer/login')}
+          className="flex items-center gap-2 px-6 py-2.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md text-sm font-semibold text-white/80 hover:text-white hover:bg-black/60 hover:scale-105 transition-all duration-300 uppercase tracking-widest shadow-lg"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+          Developer Portal
+        </button>
       </div>
     </div>
   );

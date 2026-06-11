@@ -6,8 +6,11 @@ import { useAuthStore } from './store/authStore';
 import Home from './pages/Home';
 import HighwayLogin from './pages/highway/Login';
 import MainLogin from './pages/main/Login';
+import DeveloperLogin from './pages/developer/Login';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
+
+const DeveloperDashboard = lazy(() => import('./pages/developer/Dashboard'));
 
 // Lazy loaded dashboards
 const AdminDashboardHighway = lazy(() => import('./pages/highway/dashboard/AdminDashboard'));
@@ -212,6 +215,18 @@ function App() {
             } />
             <Route path="dashboard/reports" element={
               <Suspense fallback={<LoadingFallback />}><ReportsPage /></Suspense>
+            } />
+          </Route>
+        </Route>
+
+        {/* Developer Routes */}
+        <Route path="/developer/login" element={<DeveloperLogin />} />
+        <Route path="/developer" element={<ProtectedRoute branchName="DEVELOPER" />}>
+          <Route element={<DashboardLayout branchName="DEVELOPER" />}>
+            <Route path="dashboard" element={
+              <Suspense fallback={<LoadingFallback />}>
+                <DeveloperDashboard />
+              </Suspense>
             } />
           </Route>
         </Route>
