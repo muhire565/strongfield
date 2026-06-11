@@ -231,289 +231,315 @@ export default function NewSalePage() {
      MAIN POS LAYOUT
   ══════════════════════════════════════════════ */
   return (
-    <div className="h-full flex flex-col lg:flex-row gap-6">
+    <div className="h-full flex flex-col gap-6 max-w-6xl mx-auto w-full pb-10">
 
-      {/* ── LEFT: Products table ── */}
-      <div className="flex-1 flex flex-col bg-card rounded-xl border border-border overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-border bg-muted/30">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70" size={18} />
+      {/* ── TOP SECTION: Metadata ── */}
+      <div className="bg-card rounded-xl border border-border shadow-sm p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Client Name */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              Customer Name
+              {saleType === 'credit_sale' && <span className="text-destructive">*</span>}
+            </label>
+            <div className="relative">
+              <select
+                value={selectedClient?.id || ''}
+                onChange={e => {
+                  const c = clients.find(cl => cl.id === parseInt(e.target.value));
+                  setSelectedClient(c || null);
+                }}
+                className="pos-input w-full pl-3 pr-8 py-2.5 text-sm appearance-none border-border bg-background"
+              >
+                <option value="">— Select Client (Optional for Cash) —</option>
+                {clients.map(c => (
+                  <option key={c.id} value={c.id}>{c.full_name} ({c.phone})</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Sale Type */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground">Sale Type</label>
+            <div className="grid grid-cols-2 gap-2 h-[42px]">
+              {['cash_sale', 'credit_sale'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => setSaleType(type)}
+                  className={`py-2 rounded-lg font-medium text-sm transition-all border h-full ${
+                    saleType === type
+                      ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                      : 'bg-muted text-muted-foreground border-border hover:border-primary/50'
+                  }`}
+                >
+                  {type === 'cash_sale' ? 'Cash Sale' : 'Credit Sale'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date (Read-only for now) */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-muted-foreground">Receipt Date</label>
             <input
               type="text"
-              placeholder="Search products by name, brand, model..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="pos-input w-full pl-10 pr-4 py-2.5 text-sm"
+              readOnly
+              value={new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              className="pos-input w-full px-3 py-2.5 text-sm bg-muted/30 cursor-not-allowed text-muted-foreground"
             />
           </div>
         </div>
-
-        <div className="flex-1 overflow-y-auto">
-          {loadingProducts ? (
-            <div className="flex flex-col justify-center items-center h-full gap-4 text-muted-foreground">
-              <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm">Loading products...</span>
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-full gap-3 text-muted-foreground opacity-60">
-              <Search size={48} strokeWidth={1} />
-              <p className="font-medium">{search ? 'No products match your search' : 'No products found'}</p>
-              {search && <button onClick={() => setSearch('')} className="text-sm text-primary hover:underline">Clear search</button>}
-            </div>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
-                <tr>
-                  <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Brand</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Product Name</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Model</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border text-right">Unit Price</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border text-center">Stock</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border text-center">Add</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredProducts.map(product => {
-                  const inCart    = cart.find(c => c.product_id === product.id)?.quantity || 0;
-                  const available = (product.quantity ?? 0) - inCart;
-                  const outOfStock = available <= 0;
-                  return (
-                    <motion.tr
-                      layout key={product.id}
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      className={`transition-colors ${outOfStock ? 'opacity-50 bg-muted/20' : 'hover:bg-muted/30'}`}
-                    >
-                      <td className="px-4 py-3">
-                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">{product.brand}</span>
-                      </td>
-                      <td className="px-4 py-3 font-medium text-foreground">{product.name}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground font-mono">{product.model}</td>
-                      <td className="px-4 py-3 text-right font-bold text-foreground">{fmt(product.price)}</td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          available === 0 ? 'bg-destructive/10 text-destructive'
-                          : available <= 3 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
-                          : 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
-                        }`}>
-                          {available === 0 ? 'Out of stock' : `${available} left`}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => !outOfStock && addToCart(product)}
-                          disabled={outOfStock}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto transition-all ${
-                            outOfStock
-                              ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                              : 'bg-primary text-primary-foreground hover:scale-110 hover:shadow-lg active:scale-95'
-                          }`}
-                        >
-                          <Plus size={18} />
-                        </button>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
       </div>
 
-      {/* ── RIGHT: Cart & Checkout ── */}
-      <div className="w-full lg:w-[450px] flex flex-col bg-card rounded-xl border border-border shadow-sm lg:self-start">
-
-        {/* Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
-          <div className="flex items-center space-x-2">
-            <ShoppingCart className="text-primary" size={22} />
-            <h2 className="text-lg font-bold text-foreground">Current Sale</h2>
-            {cart.length > 0 && (
-              <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                {cart.length}
-              </span>
-            )}
-          </div>
+      {/* ── ITEMS TABLE ── */}
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-visible flex-1 flex flex-col">
+        <div className="p-4 border-b border-border bg-muted/20 flex justify-between items-center">
+          <h3 className="font-semibold text-lg text-foreground">Item Table</h3>
           <button
             onClick={() => { if (cart.length === 0 || window.confirm('Clear cart?')) resetSale(); }}
             disabled={cart.length === 0}
-            className="text-muted-foreground hover:text-destructive disabled:opacity-30 transition-colors"
+            className="text-muted-foreground hover:text-destructive disabled:opacity-30 transition-colors flex items-center gap-2 text-sm font-medium"
             title="Clear cart"
           >
-            <Trash2 size={18} />
+            <Trash2 size={16} /> Clear All
           </button>
         </div>
 
-        {/* Sale type + Client */}
-        <div className="p-4 border-b border-border space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            {['cash_sale', 'credit_sale'].map(type => (
-              <button
-                key={type}
-                onClick={() => setSaleType(type)}
-                className={`py-2 rounded-lg font-medium text-sm transition-all border ${
-                  saleType === type
-                    ? 'bg-primary text-primary-foreground border-primary shadow-md'
-                    : 'bg-muted text-muted-foreground border-border hover:border-primary/50'
-                }`}
-              >
-                {type === 'cash_sale' ? 'Cash Sale' : 'Credit Sale'}
-              </button>
-            ))}
-          </div>
+        <div className="overflow-x-auto overflow-y-visible flex-1 min-h-[300px]">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead className="bg-muted/30">
+              <tr>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-10"></th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Item Details</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-36 text-center">Quantity</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-40 text-right">Rate</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-40 text-right">Amount</th>
+                <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-16 text-center"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border relative">
+              <AnimatePresence>
+                {cart.map((item) => (
+                  <motion.tr
+                    key={item.product_id}
+                    layout
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="hover:bg-muted/10 transition-colors group"
+                  >
+                    <td className="px-4 py-4 text-muted-foreground text-center">
+                       <span className="opacity-0 group-hover:opacity-100 cursor-move">⋮⋮</span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="font-semibold text-foreground">{item.product_name}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{item.brand} {item.model}</div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-center border border-border rounded-lg overflow-hidden bg-background w-28 mx-auto">
+                        <button onClick={() => updateQuantity(item.product_id, -1)} className="px-3 py-1.5 hover:bg-muted transition-colors text-foreground">
+                          <Minus size={14} />
+                        </button>
+                        <input 
+                          type="number" 
+                          value={item.quantity} 
+                          onChange={(e) => {
+                             const val = parseInt(e.target.value);
+                             if (!isNaN(val)) {
+                               const diff = val - item.quantity;
+                               updateQuantity(item.product_id, diff);
+                             }
+                          }}
+                          className="w-10 text-center font-bold text-sm bg-transparent border-none focus:ring-0 p-0 text-foreground"
+                        />
+                        <button onClick={() => updateQuantity(item.product_id, 1)} className="px-3 py-1.5 hover:bg-muted transition-colors text-foreground">
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <span className="font-medium text-foreground">{fmt(item.unit_price)}</span>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <span className="font-bold text-foreground">{fmt(item.line_total)}</span>
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <button onClick={() => removeFromCart(item.product_id)} className="text-muted-foreground hover:text-destructive p-2 transition-colors rounded-lg hover:bg-destructive/10">
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
 
-          <div className="relative">
-            <select
-              value={selectedClient?.id || ''}
-              onChange={e => {
-                const c = clients.find(cl => cl.id === parseInt(e.target.value));
-                setSelectedClient(c || null);
-              }}
-              className="pos-input w-full pl-3 pr-8 py-2.5 text-sm appearance-none"
-            >
-              <option value="">— Select Client (Optional for Cash) —</option>
-              {clients.map(c => (
-                <option key={c.id} value={c.id}>{c.full_name} ({c.phone})</option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-        </div>
+              {/* Autocomplete / Search Row */}
+              <tr>
+                <td className="px-4 py-4 text-center text-muted-foreground">
+                  <Search size={16} className="mx-auto opacity-50" />
+                </td>
+                <td colSpan={5} className="p-0 relative">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="Type or click to select an item..."
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      className="w-full px-4 py-5 bg-transparent border-none text-sm placeholder:text-muted-foreground focus:ring-0 outline-none text-foreground font-medium"
+                    />
+                    
+                    {/* Dropdown for search results */}
+                    {search.trim().length > 0 && (
+                      <div className="absolute left-4 top-[90%] w-full max-w-[600px] bg-card border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
+                        <div className="max-h-[300px] overflow-y-auto">
+                          {loadingProducts ? (
+                            <div className="p-4 text-center text-sm text-muted-foreground">Loading products...</div>
+                          ) : filteredProducts.length === 0 ? (
+                            <div className="p-4 text-center text-sm text-muted-foreground">No products found</div>
+                          ) : (
+                            <ul className="divide-y divide-border">
+                              {filteredProducts.map(product => {
+                                const inCart    = cart.find(c => c.product_id === product.id)?.quantity || 0;
+                                const available = (product.quantity ?? 0) - inCart;
+                                const outOfStock = available <= 0;
 
-        {/* Cart items */}
-        <div className="overflow-y-auto p-4 space-y-2 min-h-[160px] max-h-[40vh]">
-          <AnimatePresence>
-            {cart.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-40 space-y-3 py-10"
-              >
-                <ShoppingCart size={44} strokeWidth={1} />
-                <p className="text-sm">Cart is empty</p>
-              </motion.div>
-            )}
-            {cart.map(item => (
-              <motion.div
-                key={item.product_id} layout
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="flex items-center justify-between p-3 bg-muted/40 rounded-lg border border-border"
-              >
-                <div className="flex-1 min-w-0 pr-3">
-                  <div className="font-semibold text-foreground truncate text-sm">{item.product_name}</div>
-                  <div className="text-xs text-muted-foreground">{fmt(item.unit_price)} / unit · Total: <span className="font-medium text-foreground">{fmt(item.line_total)}</span></div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <div className="flex items-center bg-muted rounded-lg overflow-hidden border border-border">
-                    <button onClick={() => updateQuantity(item.product_id, -1)} className="px-2 py-1 hover:bg-card transition-colors text-foreground">
-                      <Minus size={12} />
-                    </button>
-                    <span className="px-2 text-center font-bold text-sm text-foreground min-w-[28px]">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.product_id, 1)} className="px-2 py-1 hover:bg-card transition-colors text-foreground">
-                      <Plus size={12} />
-                    </button>
+                                return (
+                                  <li 
+                                    key={product.id}
+                                    onClick={() => {
+                                      if (!outOfStock) {
+                                        addToCart(product);
+                                        setSearch('');
+                                      }
+                                    }}
+                                    className={`flex items-center justify-between p-3 transition-colors ${outOfStock ? 'opacity-50 cursor-not-allowed bg-muted/20' : 'cursor-pointer hover:bg-muted/50'}`}
+                                  >
+                                    <div>
+                                      <div className="font-semibold text-sm text-foreground">{product.name}</div>
+                                      <div className="text-xs text-muted-foreground mt-0.5">{product.brand} • {product.model}</div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="font-bold text-sm text-foreground">{fmt(product.price)}</div>
+                                      <div className={`text-[10px] uppercase tracking-wider font-semibold mt-1 ${available > 0 ? 'text-green-600' : 'text-destructive'}`}>
+                                        {available > 0 ? `${available} in stock` : 'Out of stock'}
+                                      </div>
+                                    </div>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <button onClick={() => removeFromCart(item.product_id)} className="text-muted-foreground hover:text-destructive p-1 transition-colors">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* Checkout panel */}
-        <div className="p-4 border-t border-border bg-muted/10 space-y-4">
-          {/* Subtotal / Discount / Total */}
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-muted-foreground">
-              <span>Subtotal</span>
-              <span className="font-medium text-foreground">{fmt(subtotal)}</span>
+        {/* ── TOTALS & CHECKOUT FOOTER ── */}
+        <div className="bg-muted/10 border-t border-border p-6 flex flex-col md:flex-row gap-8 justify-between items-end mt-auto">
+          
+          <div className="w-full md:w-1/2 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Payment Mode</label>
+                <div className="relative">
+                  <select
+                    value={paymentMode}
+                    onChange={e => setPaymentMode(e.target.value)}
+                    className="pos-input w-full pl-3 pr-8 py-2.5 text-sm appearance-none bg-background"
+                  >
+                    {PAYMENT_MODES.map(m => (
+                      <option key={m.id} value={m.id}>{m.label}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                    <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount Paid (UGX)</label>
+                <input
+                  type="number" value={amountPaidStr} min="0"
+                  onChange={e => setAmountPaidStr(e.target.value)}
+                  placeholder={totalAmount > 0 ? totalAmount.toFixed(0) : '0'}
+                  className="pos-input w-full px-3 py-2.5 text-sm font-bold bg-background"
+                />
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Discount</span>
+            
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Discount Amount</label>
               <input
                 type="number" value={discountAmountStr} min="0"
                 onChange={e => setDiscountAmountStr(e.target.value)}
                 placeholder="0"
-                className="pos-input w-28 text-right px-3 py-1.5 text-sm"
+                className="pos-input w-full md:w-1/2 px-3 py-2.5 text-sm bg-background"
               />
-            </div>
-            <div className="flex justify-between items-center text-lg font-bold border-t border-border pt-2">
-              <span className="text-foreground">Total</span>
-              <span className="text-primary">{fmt(totalAmount)}</span>
             </div>
           </div>
 
-          {/* Amount Paid */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount Paid</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 font-semibold text-xs">UGX</span>
-              <input
-                type="number" value={amountPaidStr} min="0"
-                onChange={e => setAmountPaidStr(e.target.value)}
-                placeholder={totalAmount > 0 ? totalAmount.toFixed(0) : '0'}
-                className="pos-input w-full pl-12 pr-4 py-3 font-bold text-base"
-              />
+          <div className="w-full md:w-[380px] space-y-3 p-5 bg-card rounded-xl border border-border shadow-sm">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-semibold text-foreground">{fmt(subtotal)}</span>
             </div>
-            {/* Live feedback */}
-            {amountPaid > 0 && (
-              <div className="flex justify-between text-xs font-medium px-1">
-                {change > 0 ? (
-                  <span className="text-orange-500">Change: {fmt(change)}</span>
-                ) : balanceDue > 0 ? (
-                  <span className="text-destructive">Balance due: {fmt(balanceDue)}</span>
-                ) : (
-                  <span className="text-green-600 flex items-center gap-1"><Check size={12} /> Exact payment</span>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Discount</span>
+                <span className="font-semibold">- {fmt(discountAmount)}</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center text-lg pt-3 border-t border-border">
+              <span className="font-bold text-foreground">Total</span>
+              <span className="font-black text-primary text-2xl">{fmt(totalAmount)}</span>
+            </div>
+            
+            {(amountPaid > 0 || change > 0 || balanceDue > 0) && (
+              <div className="pt-3 border-t border-border/50 text-sm space-y-1.5">
+                {change > 0 && (
+                  <div className="flex justify-between text-orange-500 font-medium">
+                    <span>Change</span>
+                    <span>{fmt(change)}</span>
+                  </div>
+                )}
+                {balanceDue > 0 && (
+                  <div className="flex justify-between text-destructive font-medium">
+                    <span>Balance Due</span>
+                    <span>{fmt(balanceDue)}</span>
+                  </div>
                 )}
               </div>
             )}
-          </div>
 
-          {/* Payment Mode */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Payment Mode</label>
-            <div className="grid grid-cols-2 gap-2">
-              {PAYMENT_MODES.map(mode => {
-                const Icon = mode.icon;
-                const selected = paymentMode === mode.id;
-                return (
-                  <button
-                    key={mode.id}
-                    onClick={() => setPaymentMode(mode.id)}
-                    className={`relative flex items-center gap-2 py-2.5 px-3 rounded-lg border text-sm font-medium transition-all ${
-                      selected
-                        ? 'bg-primary text-primary-foreground border-primary shadow-md'
-                        : 'bg-muted text-muted-foreground border-border hover:border-primary/50 hover:bg-muted/80'
-                    }`}
-                  >
-                    <Icon size={16} />
-                    <span>{mode.label}</span>
-                    {selected && (
-                      <span className="absolute top-1 right-1">
-                        <Check size={12} />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="pt-5 flex gap-3">
+               <button
+                 onClick={() => setShowPreview(true)}
+                 disabled={cart.length === 0}
+                 className="flex-[0.8] py-3.5 bg-muted text-foreground rounded-xl font-bold text-sm hover:bg-muted/80 transition-all disabled:opacity-50 border border-border"
+               >
+                 Preview
+               </button>
+               <button
+                 onClick={handleCheckout}
+                 disabled={createSaleMut.isPending || cart.length === 0}
+                 className="flex-[1.2] py-3.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+               >
+                 {createSaleMut.isPending ? 'Processing...' : 'Save and Send'}
+               </button>
             </div>
           </div>
 
-          {/* Preview button */}
-          <button
-            onClick={() => setShowPreview(true)}
-            disabled={cart.length === 0}
-            className="w-full py-4 bg-primary text-primary-foreground rounded-xl font-bold text-base shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <Eye size={20} /> Preview Sale — {fmt(totalAmount)}
-          </button>
         </div>
       </div>
 
